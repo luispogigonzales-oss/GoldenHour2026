@@ -1,0 +1,2750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GOLDEN HOUR — Coffee Shop, Custom Orders & Rewards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            gh: {
+              espresso: '#1f120b',
+              roast: '#24140c',
+              mocha: '#4a2717',
+              cocoa: '#5a311e',
+              caramel: '#9f6b43',
+              latte: '#b88256',
+              gold: '#f3c669',
+              cream: '#fdf3e3',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Base & Custom Theme Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #5a311e;
+      color: #fdf3e3;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Wood texture for menu sidebar and daily check-in pill */
+    .wood-texture {
+      background-color: #4f2b19;
+      background-image:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 214, 165, 0.04) 0px,
+          rgba(255, 214, 165, 0.04) 2px,
+          rgba(18, 9, 4, 0.14) 2px,
+          rgba(18, 9, 4, 0.14) 7px
+        ),
+        linear-gradient(180deg, rgba(255, 224, 185, 0.06) 0%, rgba(15, 7, 3, 0.25) 100%);
+    }
+
+    .wood-checkin-bar {
+      background-color: #9e6b43;
+      background-image:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 236, 209, 0.09) 0px,
+          rgba(255, 236, 209, 0.09) 3px,
+          rgba(62, 33, 14, 0.14) 3px,
+          rgba(62, 33, 14, 0.14) 9px
+        ),
+        linear-gradient(180deg, rgba(255, 235, 200, 0.14) 0%, rgba(45, 22, 8, 0.22) 100%);
+    }
+
+    /* Coffee doodle background pattern for Rewards & Redeem */
+    .doodle-bg {
+      background-color: #5a311e;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%239f6b43' stroke-opacity='0.34' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='38' cy='42' rx='10' ry='15' transform='rotate(-22 38 42)'/%3E%3Cpath d='M34 29c2 7-2 16 4 26'/%3E%3Cpath d='M84 32h34v18a14 14 0 0 1-14 14h-6a14 14 0 0 1-14-14V32z'/%3E%3Cpath d='M118 36h7a6 6 0 0 1 0 12h-7'/%3E%3Cpath d='M92 22c-2-4 2-7 0-11M103 22c-2-4 2-7 0-11'/%3E%3Cpath d='M162 24l12 18-12 18-12-18z'/%3E%3Ccircle cx='162' cy='42' r='4'/%3E%3Cpath d='M24 110h24l-4 38H28z'/%3E%3Cpath d='M22 110h28'/%3E%3Cpath d='M86 105c8-12 24-12 32 0l6 34H80z'/%3E%3Cpath d='M154 96h26v14h-26zM158 110l-4 32h34l-4-32'/%3E%3Ccircle cx='46' cy='184' r='13'/%3E%3Cpath d='M40 174c3 5-3 12 4 19'/%3E%3Cpath d='M95 175h36v14H95zM100 189h26v14h-26z'/%3E%3Cpath d='M162 168c9 0 16 7 16 16s-7 16-16 16-16-7-16-16 7-16 16-16z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Pixel art canvas crisp rendering */
+    #pixelShopCanvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Subtle gold glow for readable home typography */
+    .gold-headline-shadow {
+      text-shadow:
+        0 3px 0 rgba(26, 12, 5, 0.95),
+        0 8px 24px rgba(15, 7, 3, 0.88),
+        0 0 28px rgba(243, 198, 105, 0.22);
+    }
+
+    .copy-backdrop {
+      background: linear-gradient(135deg, rgba(24, 12, 6, 0.86) 0%, rgba(36, 19, 10, 0.72) 100%);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(243, 198, 105, 0.22);
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #2b160c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8c5a35;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #b0774c;
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.94) translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .animate-pop {
+      animation: popIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-400 selection:text-stone-950">
+
+  <!-- ===================================================================== -->
+  <!-- 1. TOP NAVIGATION BAR (Consistent across all views + Order Bag badge)  -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-40 w-full px-3 sm:px-6 pt-3 pb-2 bg-gradient-to-b from-[#3d1f11]/95 via-[#4a2717]/85 to-transparent backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
+
+      <!-- Main Dark Rounded Pill Bar (Matches 1000001507–1512) -->
+      <nav aria-label="Primary Navigation" class="flex-1 min-w-0 bg-[#1f120b] border border-[#3d2315] rounded-full px-3 sm:px-5 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex items-center justify-between gap-2 sm:gap-4">
+
+        <!-- Brand + Nav Links -->
+        <div class="flex items-center gap-1 sm:gap-3 md:gap-5 overflow-x-auto no-scrollbar">
+          <button
+            type="button"
+            onclick="navigateTo('home')"
+            class="flex items-center gap-1.5 shrink-0 pr-1 group focus:outline-none"
+            title="GOLDEN HOUR Home"
+          >
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-[#f6cf76] to-[#b5783a] text-[#1f120b] font-black text-xs shadow">
+              GH
+            </span>
+            <span class="hidden xl:inline text-xs font-extrabold tracking-widest uppercase text-[#f3c669] group-hover:text-amber-200 transition">
+              GOLDEN HOUR
+            </span>
+          </button>
+
+          <button id="nav-home" type="button" onclick="navigateTo('home')" class="nav-link px-2.5 py-1 rounded-full text-xs sm:text-sm tracking-wider uppercase text-[#e6d5c3] hover:text-white transition whitespace-nowrap">
+            HOME
+          </button>
+          <button id="nav-menu" type="button" onclick="navigateTo('menu')" class="nav-link px-2.5 py-1 rounded-full text-xs sm:text-sm tracking-wider uppercase text-[#e6d5c3] hover:text-white transition whitespace-nowrap">
+            MENU
+          </button>
+          <button id="nav-rewards" type="button" onclick="navigateTo('rewards')" class="nav-link px-2.5 py-1 rounded-full text-xs sm:text-sm tracking-wider uppercase text-[#e6d5c3] hover:text-white transition whitespace-nowrap">
+            REWARDS
+          </button>
+          <button id="nav-account" type="button" onclick="navigateTo('account')" class="nav-link px-2.5 py-1 rounded-full text-xs sm:text-sm tracking-wider uppercase text-[#e6d5c3] hover:text-white transition whitespace-nowrap">
+            ACCOUNT
+          </button>
+        </div>
+
+        <!-- Search Input Pill -->
+        <div class="hidden md:flex items-center bg-[#382114] border border-[#523220] focus-within:border-[#f3c669] rounded-full px-3.5 py-1.5 w-44 lg:w-60 transition">
+          <svg class="w-3.5 h-3.5 text-[#b59479] mr-2 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            id="topSearchInput"
+            type="text"
+            placeholder="SEARCH..."
+            oninput="handleSearchInput(this.value)"
+            onkeydown="if(event.key==='Enter'){submitSearch(this.value)}"
+            class="bg-transparent text-xs text-[#fdf3e3] placeholder-[#a6866c] focus:outline-none w-full tracking-wider"
+          />
+          <button
+            id="clearSearchBtn"
+            type="button"
+            onclick="clearSearch()"
+            class="hidden text-[#cbb097] hover:text-white text-xs ml-1"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        </div>
+      </nav>
+
+      <!-- Right Action Group: Order Bag Pill + CONTACT US Pill -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Order Bag Button -->
+        <button
+          id="orderBagBtn"
+          type="button"
+          onclick="openOrderBag()"
+          class="bg-[#1f120b] hover:bg-[#2d1a10] border border-[#f3c669]/50 text-[#fdf3e3] rounded-full px-3.5 py-2.5 shadow-[0_8px_20px_rgba(0,0,0,0.4)] flex items-center gap-2 transition active:scale-95"
+          aria-label="Open Order Bag"
+        >
+          <svg class="w-4 h-4 text-[#f3c669]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span class="text-xs font-bold tracking-wide">BAG</span>
+          <span id="bagCountBadge" class="bg-[#f3c669] text-[#1f120b] font-mono text-[11px] font-extrabold px-1.5 py-0.5 rounded-full leading-none">
+            0
+          </span>
+          <span id="bagSubtotalBadge" class="hidden sm:inline font-mono text-xs font-bold text-[#f3c669]">
+            ₱0
+          </span>
+        </button>
+
+        <!-- CONTACT US Pill Button -->
+        <button
+          id="nav-contact"
+          type="button"
+          onclick="navigateTo('contact')"
+          class="bg-[#1f120b] hover:bg-[#2d1a10] border border-[#3d2315] text-[#f3e6d8] hover:text-[#f3c669] rounded-full px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold tracking-wider uppercase shadow-[0_8px_20px_rgba(0,0,0,0.4)] transition active:scale-95"
+        >
+          CONTACT US
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Search Bar (visible on < md screens) -->
+    <div class="max-w-7xl mx-auto mt-2 md:hidden">
+      <div class="flex items-center bg-[#1f120b]/95 border border-[#4a2c1b] focus-within:border-[#f3c669] rounded-full px-3.5 py-2 shadow">
+        <svg class="w-4 h-4 text-[#b59479] mr-2 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          id="mobileSearchInput"
+          type="text"
+          placeholder="SEARCH GOLDEN HOUR MENU..."
+          oninput="handleSearchInput(this.value)"
+          class="bg-transparent text-xs text-[#fdf3e3] placeholder-[#a6866c] focus:outline-none w-full tracking-wider"
+        />
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Notification Banner (No alert() used anywhere) -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN VIEW CONTAINER                                                   -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 w-full">
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- VIEW 1: HOME PAGE (Pixel-Art Scene + High Contrast Readability)    -->
+    <!-- ------------------------------------------------------------------- -->
+    <section id="view-home" class="view-section relative w-full min-h-[calc(100vh-80px)] flex flex-col justify-between overflow-hidden">
+      <!-- Crisp Layered Pixel-Art Coffee Shop Background Canvas -->
+      <div class="absolute inset-0 z-0 pointer-events-none">
+        <canvas id="pixelShopCanvas"></canvas>
+        <!-- Left & Bottom Readable Scrims so text is crystal-clear over pixel art -->
+        <div
+          class="absolute inset-0"
+          style="background: linear-gradient(90deg, rgba(18, 9, 4, 0.88) 0%, rgba(22, 11, 5, 0.68) 46%, rgba(22, 11, 5, 0.28) 100%);"
+        ></div>
+        <div
+          class="absolute inset-x-0 bottom-0 h-44"
+          style="background: linear-gradient(180deg, rgba(18, 9, 4, 0) 0%, rgba(18, 9, 4, 0.82) 100%);"
+        ></div>
+      </div>
+
+      <!-- Foreground Content -->
+      <div class="relative z-10 max-w-7xl w-full mx-auto px-5 sm:px-10 pt-6 sm:pt-10 pb-8 flex-1 flex flex-col justify-between gap-8">
+
+        <!-- Top Brand Tag -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#1b0e08]/90 border border-[#f3c669]/50 shadow-lg">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#f3c669] animate-pulse"></span>
+            <span class="text-xs sm:text-sm font-extrabold tracking-[0.22em] uppercase text-[#f3c669]">
+              GOLDEN HOUR
+            </span>
+            <span class="text-[11px] text-[#e8d5be] hidden sm:inline">• Artisanal Roastery & Frappe Bar</span>
+          </div>
+
+          <button
+            type="button"
+            onclick="navigateTo('rewards')"
+            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1b0e08]/85 hover:bg-[#2c170d] border border-[#b88256]/50 text-xs font-semibold text-[#fdf3e3] transition"
+          >
+            <span>★</span>
+            <span>Member Points: <strong id="homePointsPreview" class="font-mono text-[#f3c669]">40 PTS</strong></span>
+          </button>
+        </div>
+
+        <!-- Middle & Bottom Split: Left Hero Copy + Right 3 Feature Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 items-end gap-8 my-auto pt-2">
+
+          <!-- Left Column: Readable Display Headline, Copy & GET PRODUCT CTA -->
+          <div class="lg:col-span-7 space-y-5">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.06] tracking-tight text-[#f7ce74] gold-headline-shadow">
+              High Quality,<br />
+              Reliable Coffee<br />
+              Product
+            </h1>
+
+            <p class="copy-backdrop rounded-2xl p-4 sm:p-5 text-base sm:text-lg font-medium leading-relaxed text-[#fff8ee] max-w-xl shadow-xl">
+              Started in 2026, they have been exporting to different parts of the world where top-quality coffee are harvested year-round.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-3.5 pt-1">
+              <button
+                type="button"
+                onclick="navigateTo('menu')"
+                class="bg-[#24130a] hover:bg-[#361d10] text-[#fff6e9] hover:text-[#f3c669] border-2 border-[#f3c669]/60 font-extrabold text-sm sm:text-base tracking-wider uppercase px-7 py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.55)] transition transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                GET PRODUCT
+              </button>
+
+              <button
+                type="button"
+                onclick="openCustomizeModal('frappe-caramel-macchiato')"
+                class="bg-[#f3c669] hover:bg-[#ffd67d] text-[#1f120b] font-extrabold text-xs sm:text-sm tracking-wider uppercase px-5 py-3.5 rounded-2xl shadow-[0_10px_25px_rgba(243,198,105,0.28)] transition transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                CUSTOMIZE SIGNATURE DRINK
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: 3 Dark Brown Feature Cards (HIGH QUALITY, HYGIENIST, TASTY) -->
+          <div class="lg:col-span-5 flex flex-row justify-start lg:justify-end gap-3 sm:gap-4">
+            <!-- Card 1: HIGH QUALITY -->
+            <button
+              type="button"
+              onclick="navigateTo('menu', 'CLASSIC')"
+              class="flex-1 max-w-[132px] bg-[#24130b]/95 hover:bg-[#2f190f] border border-[#573421] hover:border-[#f3c669]/60 rounded-2xl p-3.5 sm:p-4 flex flex-col items-center justify-center text-center gap-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.55)] transition transform hover:-translate-y-1"
+            >
+              <svg class="w-9 h-9 sm:w-11 sm:h-11 text-[#d9d2cb]" viewBox="0 0 48 48" fill="currentColor">
+                <path d="M24 3l4.2 3.4 5.4-.5 2.1 5 5 2.1-.5 5.4L43.6 24l-3.4 4.2.5 5.4-5 2.1-2.1 5-5.4-.5L24 43.6l-4.2-3.4-5.4.5-2.1-5-5-2.1.5-5.4L4 24l3.4-4.2-.5-5.4 5-2.1 2.1-5 5.4.5L24 3zm8.2 16.4-2.3-2.3-7.9 7.9-4-4-2.3 2.3 6.3 6.3 10.3-10.1z"/>
+              </svg>
+              <span class="text-[11px] sm:text-xs font-extrabold tracking-wider uppercase text-[#f3e7d8] leading-tight">
+                HIGH QUALITY
+              </span>
+            </button>
+
+            <!-- Card 2: HYGIENIST -->
+            <button
+              type="button"
+              onclick="navigateTo('contact')"
+              class="flex-1 max-w-[132px] bg-[#24130b]/95 hover:bg-[#2f190f] border border-[#573421] hover:border-[#f3c669]/60 rounded-2xl p-3.5 sm:p-4 flex flex-col items-center justify-center text-center gap-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.55)] transition transform hover:-translate-y-1"
+            >
+              <svg class="w-9 h-9 sm:w-11 sm:h-11 text-[#d4ccc4]" viewBox="0 0 48 48" fill="currentColor">
+                <path d="M24 5c1.8 10.2 8.8 17.2 19 19-10.2 1.8-17.2 8.8-19 19-1.8-10.2-8.8-17.2-19-19 10.2-1.8 17.2-8.8 19-19z"/>
+              </svg>
+              <span class="text-[11px] sm:text-xs font-extrabold tracking-wider uppercase text-[#f3e7d8] leading-tight">
+                HYGIENIST
+              </span>
+            </button>
+
+            <!-- Card 3: TASTY -->
+            <button
+              type="button"
+              onclick="navigateTo('menu', 'FRAPPE')"
+              class="flex-1 max-w-[132px] bg-[#24130b]/95 hover:bg-[#2f190f] border border-[#573421] hover:border-[#f3c669]/60 rounded-2xl p-3.5 sm:p-4 flex flex-col items-center justify-center text-center gap-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.55)] transition transform hover:-translate-y-1"
+            >
+              <svg class="w-9 h-9 sm:w-11 sm:h-11 text-[#d4a068]" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 27c0-6 6-11 14-11s14 5 14 11c0 5-5 9-14 9s-14-4-14-9z"/>
+                <path d="M15 17c-2-4 0-8 3-9M33 17c2-4 0-8-3-9"/>
+                <path d="M18 16v19M30 16v19"/>
+              </svg>
+              <span class="text-[11px] sm:text-xs font-extrabold tracking-wider uppercase text-[#f3e7d8] leading-tight">
+                TASTY
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- VIEW 2: MENU PAGE (Wood Sidebar with All 9 Categories + Drink Grid)  -->
+    <!-- ------------------------------------------------------------------- -->
+    <section id="view-menu" class="view-section hidden min-h-[calc(100vh-80px)] bg-[#5a311e]">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row min-h-[calc(100vh-84px)] border-t border-[#724028]/50">
+
+        <!-- Left Wood-Textured Sidebar (All 9 Exact Categories from 1000001508.png) -->
+        <aside class="w-full md:w-44 lg:w-52 shrink-0 wood-texture border-b md:border-b-0 md:border-r border-[#331a0e] flex md:flex-col overflow-x-auto md:overflow-x-visible shadow-inner">
+          <div id="categorySidebarList" class="flex md:flex-col w-full divide-x md:divide-x-0 md:divide-y divide-[#381d10]">
+            <!-- Populated dynamically by JS with exact 9 categories -->
+          </div>
+        </aside>
+
+        <!-- Right Menu Content Area -->
+        <div class="flex-1 p-5 sm:p-8 lg:p-10">
+          <!-- Category Header Banner -->
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 mb-7 border-b border-[#7a452c]">
+            <div>
+              <div class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-[#f3c669] mb-1">
+                <span>GOLDEN HOUR MENU</span>
+                <span id="searchActiveBadge" class="hidden bg-[#f3c669] text-[#1f120b] px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                  SEARCH FILTERED
+                </span>
+              </div>
+              <h2 id="activeCategoryTitle" class="text-2xl sm:text-3xl font-black tracking-wide uppercase text-[#fdf3e3]">
+                FRAPPE
+              </h2>
+              <p id="activeCategoryDesc" class="text-sm text-[#e6cbb2] mt-1 max-w-2xl">
+                Blended icy favorites topped with whipped cream and signature drizzles. Tap any drink to customize size, sweetness, milk, and add-ons.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+              <span id="menuItemCount" class="text-xs font-mono font-bold bg-[#3c1f11] border border-[#7c472d] text-[#f3c669] px-3 py-1.5 rounded-full">
+                8 ITEMS
+              </span>
+            </div>
+          </div>
+
+          <!-- Drink Cards Grid (4 columns on lg matching 1000001508.png) -->
+          <div id="menuDrinksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+            <!-- Populated dynamically by JS -->
+          </div>
+
+          <!-- Empty Search State -->
+          <div id="emptyMenuState" class="hidden text-center py-16 px-4 bg-[#462415] rounded-3xl border border-[#734028] mt-4">
+            <p class="text-lg font-bold text-[#f3c669]">No drinks match your search</p>
+            <p class="text-sm text-[#e3c7ad] mt-1">Try searching for "Matcha", "Caramel", "Biscoff", "Mango", or switch categories on the sidebar.</p>
+            <button
+              type="button"
+              onclick="clearSearch()"
+              class="mt-4 bg-[#f3c669] text-[#1f120b] font-extrabold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full hover:bg-[#ffd67d] transition"
+            >
+              Reset Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- VIEW 3: REWARDS & REDEEM PAGE (1000001509.png & 1000001510.png)     -->
+    <!-- ------------------------------------------------------------------- -->
+    <section id="view-rewards" class="view-section hidden min-h-[calc(100vh-80px)] doodle-bg px-4 sm:px-8 py-6 sm:py-8">
+      <div class="max-w-5xl mx-auto">
+
+        <!-- Top-Left REDEEM Toggle Tab (Matches 1000001509 & 1000001510) -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div class="inline-flex rounded-md overflow-hidden shadow-lg border border-[#7d4c2d]">
+            <button
+              id="tabPointsCheckIn"
+              type="button"
+              onclick="setRewardsSubTab('checkin')"
+              class="px-5 py-2 text-xs sm:text-sm font-extrabold tracking-wider uppercase transition bg-[#9e6b43] text-[#fdf3e3]"
+            >
+              POINTS & CHECK-IN
+            </button>
+            <button
+              id="tabRedeemDrinks"
+              type="button"
+              onclick="setRewardsSubTab('redeem')"
+              class="px-5 py-2 text-xs sm:text-sm font-extrabold tracking-wider uppercase transition bg-[#3d2012] text-[#e6cbb2] hover:bg-[#4e2a18]"
+            >
+              REDEEM
+            </button>
+          </div>
+
+          <div class="bg-[#24130b]/95 border border-[#9e6b43]/60 rounded-full px-4 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-2 shadow">
+            <span class="text-[#f3c669]">GOLDEN HOUR REWARDS</span>
+            <span>•</span>
+            <span id="rewardsTopBadge" class="font-mono text-[#f3c669]">40 PTS</span>
+          </div>
+        </div>
+
+        <!-- SUB-TAB A: Points Arc Gauge + Daily Check-In (1000001509.png) -->
+        <div id="rewardsCheckInView" class="space-y-8 animate-pop">
+          <!-- Center Points Arc & Iced Coffee Illustration -->
+          <div class="flex flex-col items-center justify-center pt-2 pb-4">
+            <div class="relative w-72 sm:w-80 h-56 sm:h-64 flex flex-col items-center justify-end">
+              <!-- Brown Semi-Circular Arc -->
+              <svg class="w-full h-full absolute top-0 left-0" viewBox="0 0 320 220">
+                <path
+                  d="M 42 156 A 118 118 0 0 1 278 156"
+                  fill="none"
+                  stroke="#9e6b43"
+                  stroke-width="18"
+                  stroke-linecap="butt"
+                />
+                <path
+                  id="pointsProgressArc"
+                  d="M 42 156 A 118 118 0 0 1 278 156"
+                  fill="none"
+                  stroke="#f3c669"
+                  stroke-width="18"
+                  stroke-linecap="round"
+                  stroke-dasharray="371"
+                  stroke-dashoffset="260"
+                  class="transition-all duration-500"
+                />
+              </svg>
+
+              <!-- Center Iced Coffee Cup SVG -->
+              <div class="relative z-10 flex flex-col items-center mb-3">
+                <svg class="w-24 h-32 drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)]" viewBox="0 0 100 135">
+                  <!-- Straw -->
+                  <path d="M58 26 L74 6 L81 10 L65 28 Z" fill="#f7efe4" stroke="#2c160b" stroke-width="2" />
+                  <!-- Lid -->
+                  <rect x="24" y="25" width="52" height="10" rx="4" fill="#efe4d4" stroke="#2c160b" stroke-width="2.2" />
+                  <rect x="28" y="34" width="44" height="5" rx="2" fill="#d9cbb8" stroke="#2c160b" stroke-width="1.8" />
+                  <!-- Cup Body -->
+                  <path d="M29 39 L71 39 L64 114 L36 114 Z" fill="#8b5732" stroke="#2c160b" stroke-width="2.4" />
+                  <!-- Coffee Swirl / Highlights -->
+                  <path d="M38 48 C35 66 42 82 39 104" fill="none" stroke="#b97d4e" stroke-width="4" stroke-linecap="round" />
+                  <path d="M56 50 C59 72 52 88 57 105" fill="none" stroke="#5b351b" stroke-width="3.5" stroke-linecap="round" />
+                  <!-- Bottom Rim -->
+                  <rect x="35" y="113" width="30" height="5" rx="2" fill="#efe4d4" stroke="#2c160b" stroke-width="1.8" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Points Counter Readout -->
+            <div class="text-center -mt-1">
+              <div id="rewardsPointsNumber" class="font-mono text-4xl sm:text-5xl font-black text-[#fff8ee] tracking-tight drop-shadow">
+                40
+              </div>
+              <div class="text-sm sm:text-base font-extrabold tracking-[0.18em] uppercase text-[#fff8ee] mt-0.5">
+                POINTS
+              </div>
+              <p class="text-xs text-[#e6cbb2] mt-1">
+                Tip: Earn +5 pts per customized order or claim daily check-in beans below!
+              </p>
+            </div>
+          </div>
+
+          <!-- Wood-Textured DAILY CHECK-IN Bar (Days 1 to 7) -->
+          <div class="wood-checkin-bar rounded-full px-5 sm:px-8 py-5 sm:py-6 shadow-[0_14px_30px_rgba(0,0,0,0.45)] border border-[#bd895e]/50">
+            <div class="text-xs sm:text-sm font-extrabold tracking-widest uppercase text-[#fff7ec] mb-4 pl-1">
+              DAILY CHECK-IN
+            </div>
+            <div id="dailyCheckInRow" class="grid grid-cols-4 sm:grid-cols-7 gap-3 sm:gap-4 items-center justify-items-center">
+              <!-- Populated dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Redeemed Vouchers / History Strip -->
+          <div id="redeemedVouchersBox" class="hidden bg-[#24130b]/90 border border-[#7c482c] rounded-2xl p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-extrabold tracking-widest uppercase text-[#f3c669]">
+                YOUR REDEEMED DRINKS & VOUCHERS
+              </h3>
+              <button type="button" onclick="setRewardsSubTab('redeem')" class="text-xs font-bold underline text-[#fdf3e3] hover:text-[#f3c669]">
+                Redeem More →
+              </button>
+            </div>
+            <div id="redeemedVouchersList" class="flex flex-wrap gap-2.5"></div>
+          </div>
+        </div>
+
+        <!-- SUB-TAB B: Redeemable Drinks Cards (1000001510.png) -->
+        <div id="rewardsRedeemView" class="hidden space-y-6 animate-pop">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#24130b]/85 border border-[#7c482c] rounded-2xl px-5 py-3.5">
+            <div>
+              <h2 class="text-lg sm:text-xl font-black uppercase tracking-wide text-[#fdf3e3]">
+                Redeem Rewards with Your Points
+              </h2>
+              <p class="text-xs sm:text-sm text-[#e6cbb2]">
+                Tap REDEEM on a drink to claim a free reward voucher added straight to your Order Bag.
+              </p>
+            </div>
+            <div class="font-mono text-sm font-bold bg-[#3e2112] border border-[#9e6b43] text-[#f3c669] px-4 py-2 rounded-xl shrink-0">
+              Balance: <span id="redeemBalanceText">40</span> pts
+            </div>
+          </div>
+
+          <div id="redeemCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- VIEW 4: ACCOUNT PAGE (Philippine +63 Phone Login & OTP Flow - 1511)  -->
+    <!-- ------------------------------------------------------------------- -->
+    <section id="view-account" class="view-section hidden min-h-[calc(100vh-80px)] bg-[#5a311e] flex items-center justify-center px-4 py-10">
+      <div class="w-full max-w-md flex flex-col items-center text-center animate-pop">
+
+        <!-- Steaming Coffee Cup Emblem (Matches 1000001511.png) -->
+        <div class="mb-5">
+          <svg class="w-28 h-24 text-[#c69158] mx-auto drop-shadow" viewBox="0 0 120 100" fill="currentColor">
+            <!-- Steam lines -->
+            <path d="M52 24c-4-7 4-13-1-20" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" />
+            <path d="M64 22c-4-8 5-14 0-21" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" />
+            <!-- Cup & Saucer -->
+            <path d="M26 36h54v14c0 15-11 26-27 26s-27-11-27-26V36zm54 5h7a9 9 0 0 1 0 18h-7v-5h7a4 4 0 0 0 0-8h-7v-5z" />
+            <ellipse cx="53" cy="85" rx="34" ry="6" />
+          </svg>
+        </div>
+
+        <!-- Logged-In Member Card (Shown after OTP verification) -->
+        <div id="loggedInMemberPanel" class="hidden w-full bg-[#24130b] border border-[#8e5b38] rounded-3xl p-6 text-left shadow-2xl space-y-4">
+          <div class="flex items-center justify-between border-b border-[#452616] pb-3">
+            <div>
+              <span class="text-[11px] font-extrabold tracking-widest uppercase text-[#f3c669]">GOLDEN HOUR MEMBER</span>
+              <h2 id="memberPhoneDisplay" class="text-lg font-extrabold text-[#fdf3e3] font-mono">+63 917 000 0000</h2>
+            </div>
+            <button
+              type="button"
+              onclick="logoutMember()"
+              class="text-xs font-bold text-[#e3b892] hover:text-white underline"
+            >
+              Sign Out
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-[#381e12] rounded-2xl p-3.5 border border-[#5c3621]">
+              <div class="text-[11px] uppercase tracking-wider text-[#d9b89c]">Reward Points</div>
+              <div id="memberPointsDisplay" class="font-mono text-2xl font-black text-[#f3c669] mt-0.5">40 PTS</div>
+            </div>
+            <div class="bg-[#381e12] rounded-2xl p-3.5 border border-[#5c3621]">
+              <div class="text-[11px] uppercase tracking-wider text-[#d9b89c]">Orders Placed</div>
+              <div id="memberOrdersCount" class="font-mono text-2xl font-black text-[#fdf3e3] mt-0.5">0</div>
+            </div>
+          </div>
+
+          <div id="memberOrderHistory" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <p class="text-xs text-[#cfa98a]">No past orders yet. Head to MENU to customize your first drink!</p>
+          </div>
+
+          <button
+            type="button"
+            onclick="navigateTo('menu')"
+            class="w-full bg-[#f3c669] hover:bg-[#ffd67d] text-[#1f120b] font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition"
+          >
+            Order Drinks Now
+          </button>
+        </div>
+
+        <!-- Phone Login Form (Matches 1000001511.png) -->
+        <div id="phoneLoginPanel" class="w-full space-y-4">
+          <h1 class="text-xl sm:text-2xl font-extrabold text-[#fff8ee] tracking-tight">
+            Enter your phone number
+          </h1>
+
+          <!-- +63 Flag & Phone Input Bar -->
+          <div class="w-full bg-[#9e6b43] rounded-md px-3.5 py-2.5 flex items-center gap-2.5 shadow-md border border-[#b67f54]/50">
+            <!-- Philippine Flag SVG -->
+            <svg class="w-7 h-5 rounded-[2px] shrink-0 shadow-sm" viewBox="0 0 36 24">
+              <rect width="36" height="12" fill="#0038a8" />
+              <rect y="12" width="36" height="12" fill="#ce1126" />
+              <polygon points="0,0 18,12 0,24" fill="#ffffff" />
+              <circle cx="6.5" cy="12" r="3" fill="#fcd116" />
+            </svg>
+            <span class="text-sm font-extrabold text-[#fff8ee] select-none flex items-center gap-1">
+              +63
+              <svg class="w-3.5 h-3.5 opacity-85" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+            <span class="h-5 w-[1px] bg-[#fff8ee]/40"></span>
+            <input
+              id="phoneInput"
+              type="tel"
+              maxlength="12"
+              placeholder="917 123 4567"
+              class="w-full bg-transparent text-sm sm:text-base font-semibold text-[#fff8ee] placeholder-[#e6cbb2]/70 focus:outline-none font-mono"
+            />
+          </div>
+
+          <!-- Divider: receive 4-digit code via -->
+          <div class="flex items-center gap-3 pt-1">
+            <div class="flex-1 h-[1px] bg-[#b5835a]/60"></div>
+            <span class="text-xs sm:text-sm font-semibold text-[#fff8ee]/95">receive 4-digit code via</span>
+            <div class="flex-1 h-[1px] bg-[#b5835a]/60"></div>
+          </div>
+
+          <!-- SMS & VIBER Buttons -->
+          <div class="w-full max-w-xs mx-auto space-y-2.5 pt-1">
+            <button
+              type="button"
+              onclick="requestOtpCode('SMS')"
+              class="w-full bg-[#9e6b43] hover:bg-[#b0794e] active:scale-[0.99] text-[#fff8ee] font-extrabold text-sm tracking-wider uppercase py-2.5 rounded-sm shadow transition"
+            >
+              SMS
+            </button>
+            <button
+              type="button"
+              onclick="requestOtpCode('VIBER')"
+              class="w-full bg-[#9e6b43] hover:bg-[#b0794e] active:scale-[0.99] text-[#fff8ee] font-extrabold text-sm tracking-wider uppercase py-2.5 rounded-sm shadow transition"
+            >
+              VIBER
+            </button>
+          </div>
+
+          <!-- Interactive 4-Digit OTP Box (Appears when SMS or VIBER is clicked) -->
+          <div id="otpVerificationBox" class="hidden w-full max-w-xs mx-auto bg-[#24130b] border border-[#9e6b43] rounded-2xl p-4 mt-3 space-y-3 shadow-xl">
+            <p id="otpPromptText" class="text-xs text-[#f3c669] font-semibold">
+              Enter the 4-digit code sent via SMS:
+            </p>
+            <input
+              id="otpCodeInput"
+              type="text"
+              maxlength="4"
+              placeholder="1234"
+              class="w-full bg-[#3a1f12] border border-[#7c482c] rounded-lg px-3 py-2 text-center font-mono text-lg tracking-[0.4em] text-[#fdf3e3] focus:outline-none focus:border-[#f3c669]"
+            />
+            <button
+              type="button"
+              onclick="verifyOtpCode()"
+              class="w-full bg-[#f3c669] hover:bg-[#ffd67d] text-[#1f120b] font-extrabold text-xs uppercase tracking-wider py-2.5 rounded-lg transition"
+            >
+              VERIFY & LOG IN
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- VIEW 5: CONTACT US PAGE (Matches 1000001512.png)                      -->
+    <!-- ------------------------------------------------------------------- -->
+    <section id="view-contact" class="view-section hidden min-h-[calc(100vh-80px)] bg-[#5a311e] flex items-center justify-center px-4 py-10">
+      <div class="w-full max-w-2xl bg-[#3c2012] border border-[#5a321e] rounded-sm p-6 sm:p-10 shadow-[0_18px_40px_rgba(0,0,0,0.45)] animate-pop">
+
+        <div class="mb-6">
+          <h1 class="text-lg sm:text-xl font-extrabold text-[#fff8ee]">
+            Contact Us
+          </h1>
+          <p class="text-sm sm:text-base font-bold text-[#c7915b] mt-0.5 leading-snug">
+            Questions, orders or partnerships? Send us a message.
+          </p>
+        </div>
+
+        <form id="contactForm" onsubmit="handleContactSubmit(event)" class="space-y-4 flex flex-col items-center">
+          <input
+            id="contactName"
+            type="text"
+            required
+            placeholder="Your name"
+            class="w-full max-w-md bg-[#9e6b43] placeholder-[#fff4e4]/85 text-[#fff8ee] font-medium text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f3c669] shadow-inner"
+          />
+
+          <input
+            id="contactEmail"
+            type="email"
+            required
+            placeholder="Email address"
+            class="w-full max-w-md bg-[#9e6b43] placeholder-[#fff4e4]/85 text-[#fff8ee] font-medium text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f3c669] shadow-inner"
+          />
+
+          <textarea
+            id="contactMessage"
+            rows="4"
+            required
+            placeholder="Your message"
+            class="w-full max-w-md bg-[#9e6b43] placeholder-[#fff4e4]/85 text-[#fff8ee] font-medium text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f3c669] shadow-inner resize-y min-h-[110px]"
+          ></textarea>
+
+          <div class="w-full max-w-xs flex flex-col gap-2.5 pt-2">
+            <!-- Nostalgic SENE MESSAGE label with clear send functionality -->
+            <button
+              type="submit"
+              class="w-full bg-[#c9965c] hover:bg-[#d8a56a] text-[#1f120b] font-black text-xs sm:text-sm tracking-wider uppercase py-2.5 rounded-full shadow transition active:scale-[0.99]"
+              title="Send Message"
+            >
+              SENE MESSAGE • SEND
+            </button>
+
+            <button
+              type="button"
+              onclick="resetContactForm()"
+              class="w-full bg-[#9e6b43] hover:bg-[#ad774d] text-[#fff8ee] font-bold text-xs sm:text-sm tracking-wide py-2.5 rounded-full shadow transition active:scale-[0.99]"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        <!-- Confirmation Box after submitting Contact Form -->
+        <div id="contactSuccessBanner" class="hidden mt-6 max-w-md mx-auto bg-[#231209] border border-[#f3c669]/60 rounded-2xl p-4 text-center space-y-2">
+          <p class="text-sm font-extrabold text-[#f3c669]">Message Sent to GOLDEN HOUR!</p>
+          <p id="contactConfirmationText" class="text-xs text-[#ead2ba]"></p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: DRINK CUSTOMIZATION MODAL                                    -->
+  <!-- ===================================================================== -->
+  <div id="customizeModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-[#2a160d] border border-[#8f5b38] rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl my-auto animate-pop">
+
+      <!-- Modal Top Header -->
+      <div class="flex items-center justify-between px-6 py-4 bg-[#1d0f08] border-b border-[#4c2b1a]">
+        <div>
+          <span id="customCategoryTag" class="text-[11px] font-extrabold tracking-widest uppercase text-[#f3c669]">FRAPPE</span>
+          <h3 id="customDrinkName" class="text-xl sm:text-2xl font-black text-[#fdf3e3]">Caramel Macchiato</h3>
+        </div>
+        <button
+          type="button"
+          onclick="closeCustomizeModal()"
+          class="w-9 h-9 rounded-full bg-[#381e12] hover:bg-[#4e2a18] text-[#fdf3e3] flex items-center justify-center font-bold transition"
+          aria-label="Close customization modal"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        <!-- Drink Preview + Base Price -->
+        <div class="flex flex-col sm:flex-row items-center gap-4 bg-[#381e12] border border-[#59331f] rounded-2xl p-4">
+          <div id="customDrinkArtwork" class="w-24 h-28 shrink-0 flex items-center justify-center"></div>
+          <div class="flex-1 text-center sm:text-left">
+            <p id="customDrinkDesc" class="text-xs sm:text-sm text-[#ead2ba] leading-relaxed"></p>
+            <div class="mt-2 inline-flex items-center gap-2 bg-[#231209] px-3 py-1 rounded-full border border-[#6e4028]">
+              <span class="text-xs text-[#d6b395]">Base Price:</span>
+              <span id="customBasePrice" class="font-mono text-sm font-bold text-[#f3c669]">₱120</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Size -->
+        <div>
+          <label class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-2">
+            1. Cup Size
+          </label>
+          <div id="sizeOptionsGroup" class="grid grid-cols-3 gap-2.5"></div>
+        </div>
+
+        <!-- 2. Sweetness & Ice Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-2">
+              2. Sweetness Level
+            </label>
+            <div id="sweetnessOptionsGroup" class="grid grid-cols-2 gap-2"></div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-2">
+              3. Ice Level
+            </label>
+            <div id="iceOptionsGroup" class="grid grid-cols-2 gap-2"></div>
+          </div>
+        </div>
+
+        <!-- 4. Milk / Base Choice -->
+        <div>
+          <label class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-2">
+            4. Milk / Base Choice
+          </label>
+          <div id="milkOptionsGroup" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+        </div>
+
+        <!-- 5. Add-ons / Toppings -->
+        <div>
+          <label class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-2">
+            5. Add-ons & Toppings (Select any)
+          </label>
+          <div id="addonsOptionsGroup" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+
+        <!-- 6. Special Notes + Quantity -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div class="sm:col-span-2">
+            <label for="customNotesInput" class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-1.5">
+              6. Special Notes / Barista Requests
+            </label>
+            <input
+              id="customNotesInput"
+              type="text"
+              placeholder="e.g., Extra caramel swirl on cup, less foam..."
+              class="w-full bg-[#1d0f08] border border-[#59331f] focus:border-[#f3c669] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#fdf3e3] placeholder-[#9b7a5e] focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-extrabold uppercase tracking-wider text-[#f3c669] mb-1.5">
+              Quantity
+            </label>
+            <div class="flex items-center justify-between bg-[#1d0f08] border border-[#59331f] rounded-xl px-2 py-1.5">
+              <button
+                type="button"
+                onclick="changeCustomQty(-1)"
+                class="w-8 h-8 rounded-lg bg-[#381e12] hover:bg-[#4e2a18] text-[#fdf3e3] font-black transition"
+              >
+                −
+              </button>
+              <span id="customQtyValue" class="font-mono text-base font-extrabold text-[#fdf3e3]">1</span>
+              <button
+                type="button"
+                onclick="changeCustomQty(1)"
+                class="w-8 h-8 rounded-lg bg-[#381e12] hover:bg-[#4e2a18] text-[#fdf3e3] font-black transition"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer: Live Total & Add to Order -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 bg-[#1d0f08] border-t border-[#4c2b1a]">
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-[#d4b294]">Customized Total</div>
+          <div id="customLiveTotal" class="font-mono text-2xl font-black text-[#f3c669]">₱120</div>
+        </div>
+        <button
+          type="button"
+          onclick="addCustomizedItemToBag()"
+          class="w-full sm:w-auto bg-[#f3c669] hover:bg-[#ffd67d] text-[#1f120b] font-black text-sm tracking-wider uppercase px-7 py-3.5 rounded-2xl shadow-lg transition active:scale-95"
+        >
+          ADD TO ORDER BAG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: ORDER BAG DRAWER / MODAL                                      -->
+  <!-- ===================================================================== -->
+  <div id="orderBagModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-xs flex justify-end">
+    <div class="w-full max-w-md bg-[#26140c] border-l border-[#7e4a2d] h-full flex flex-col justify-between shadow-2xl animate-pop">
+
+      <!-- Bag Header -->
+      <div class="flex items-center justify-between px-5 py-4 bg-[#1a0d07] border-b border-[#492818]">
+        <div class="flex items-center gap-2.5">
+          <span class="text-lg">☕</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-black tracking-wide uppercase text-[#fdf3e3]">Your Order Bag</h3>
+            <p class="text-[11px] text-[#dfb896]">GOLDEN HOUR • Freshly Crafted</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="closeOrderBag()"
+          class="w-9 h-9 rounded-full bg-[#381e12] hover:bg-[#4e2a18] text-[#fdf3e3] font-bold flex items-center justify-center transition"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Bag Items List -->
+      <div id="orderBagItemsContainer" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Bag Summary & Place Order CTA -->
+      <div class="p-5 bg-[#1a0d07] border-t border-[#492818] space-y-3">
+        <div class="flex items-center justify-between text-xs text-[#e5c9ae]">
+          <span>Estimated Loyalty Points Earned</span>
+          <span id="bagPointsPreview" class="font-mono font-bold text-[#f3c669]">+0 PTS</span>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-[#3a1f12] pt-2.5">
+          <span class="text-sm font-extrabold uppercase tracking-wider text-[#fdf3e3]">Total Amount</span>
+          <span id="bagModalTotal" class="font-mono text-2xl font-black text-[#f3c669]">₱0</span>
+        </div>
+
+        <div class="flex gap-2.5 pt-1">
+          <button
+            type="button"
+            onclick="closeOrderBag(); navigateTo('menu');"
+            class="px-4 py-3 rounded-xl bg-[#381e12] hover:bg-[#4b2919] text-[#fdf3e3] text-xs font-extrabold uppercase tracking-wider transition"
+          >
+            + Add Drink
+          </button>
+          <button
+            id="placeOrderBtn"
+            type="button"
+            onclick="placeOrderNow()"
+            disabled
+            class="flex-1 bg-[#f3c669] hover:bg-[#ffd67d] disabled:opacity-40 disabled:cursor-not-allowed text-[#1f120b] font-black text-sm tracking-wider uppercase py-3 rounded-xl shadow-lg transition active:scale-95"
+          >
+            PLACE ORDER
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: THANK YOU ORDER CONFIRMATION MODAL                           -->
+  <!-- ===================================================================== -->
+  <div id="thankYouModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-lg bg-[#27140c] border-2 border-[#f3c669] rounded-3xl p-6 sm:p-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.75)] my-auto animate-pop">
+
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#f6cf76] to-[#b5783a] text-[#1f120b] mx-auto flex items-center justify-center text-3xl font-black shadow-lg mb-4">
+        ✓
+      </div>
+
+      <span class="inline-block text-[11px] font-extrabold tracking-[0.22em] uppercase text-[#f3c669] bg-[#3b1f12] px-3.5 py-1 rounded-full mb-2">
+        ORDER CONFIRMED • GOLDEN HOUR
+      </span>
+
+      <h2 class="text-2xl sm:text-3xl font-black text-[#fdf3e3] leading-tight">
+        Thank You for Your Order!
+      </h2>
+      <p class="text-xs sm:text-sm text-[#e6cbb2] mt-1.5">
+        Our baristas are crafting your golden hour drinks with care.
+      </p>
+
+      <!-- Order Reference & Prep Info -->
+      <div class="mt-5 bg-[#1b0e08] border border-[#4f2d1b] rounded-2xl p-4 text-left space-y-2.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-[#cfa98a]">Order Reference:</span>
+          <span id="thankYouOrderRef" class="font-mono font-extrabold text-[#f3c669]">GH-2026-0000</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-[#cfa98a]">Estimated Prep Time:</span>
+          <span class="font-bold text-[#fdf3e3]">8 – 12 mins</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-[#cfa98a]">Loyalty Points Earned:</span>
+          <span id="thankYouPointsEarned" class="font-mono font-extrabold text-emerald-400">+5 PTS</span>
+        </div>
+
+        <div id="thankYouItemizedList" class="border-t border-[#361d10] pt-2.5 space-y-1.5 max-h-40 overflow-y-auto text-xs">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="border-t border-[#361d10] pt-2 flex items-center justify-between text-sm font-black">
+          <span class="text-[#fdf3e3]">Total Paid</span>
+          <span id="thankYouTotalPaid" class="font-mono text-lg text-[#f3c669]">₱0</span>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-col sm:flex-row gap-3">
+        <button
+          type="button"
+          onclick="closeThankYouModal(); navigateTo('rewards');"
+          class="flex-1 bg-[#3d2112] hover:bg-[#522d19] border border-[#9e6b43]/60 text-[#fdf3e3] font-extrabold text-xs uppercase tracking-wider py-3.5 rounded-2xl transition"
+        >
+          View Rewards Points
+        </button>
+        <button
+          type="button"
+          onclick="closeThankYouModal(); navigateTo('home');"
+          class="flex-1 bg-[#f3c669] hover:bg-[#ffd67d] text-[#1f120b] font-black text-xs uppercase tracking-wider py-3.5 rounded-2xl shadow-lg transition"
+        >
+          Back to Home
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT: DATA, PIXEL ART ENGINE, CUSTOMIZER, BAG, REWARDS & FORMS  -->
+  <!-- ===================================================================== -->
+  <script>
+    // -----------------------------------------------------------------------
+    // 1. CATEGORIES & MENU CATALOG (Exact 9 Sidebar Categories + Drinks)
+    // -----------------------------------------------------------------------
+    const CATEGORIES = [
+      {
+        id: 'FRAPPE',
+        label: 'FRAPPE',
+        desc: 'Blended icy favorites topped with whipped cream and signature drizzles. Tap any drink to customize size, sweetness, milk, and add-ons.'
+      },
+      {
+        id: 'BUTTERPUP SERIES',
+        label: 'BUTTERPUP\nSERIES',
+        desc: 'Rich, velvety butterscotch and golden caramel creations crafted for smooth, indulgent sipping.'
+      },
+      {
+        id: 'MATCHA SERIES',
+        label: 'MATCHA\nSERIES',
+        desc: 'Earthy ceremonial-grade green tea blended or layered with creamy milk, espresso, and sweet swirls.'
+      },
+      {
+        id: 'MANGO SERIES',
+        label: 'MANGO\nSERIES',
+        desc: 'Sun-ripened tropical mango drinks balanced with creamy graham, tea, and sparkling notes.'
+      },
+      {
+        id: 'STRAWBERRY SERIES',
+        label: 'STRAWBERRY\nSERIES',
+        desc: 'Sweet berry blends and layered lattes finished with whipped cream and strawberry compote.'
+      },
+      {
+        id: 'WHITE CHOCO SERIES',
+        label: 'WHITE CHOCO\nSERIES',
+        desc: 'Silky white chocolate drinks with roasted coffee, toasted notes, and berry accents.'
+      },
+      {
+        id: 'CLASSIC',
+        label: 'CLASSIC',
+        desc: 'Timeless espresso and brewed coffee staples made from GOLDEN HOUR harvested beans.'
+      },
+      {
+        id: 'COOKIES',
+        label: 'COOKIES',
+        desc: 'Crunchy cookie crumbles and cookie butter blends swirled into rich iced and frozen treats.'
+      },
+      {
+        id: 'TEA',
+        label: 'TEA',
+        desc: 'Refreshing steeped teas—fruity, citrusy, floral, and milky—brewed fresh for any hour.'
+      }
+    ];
+
+    const MENU_ITEMS = [
+      // --- FRAPPE (First 8 match 1000001508.png prices & names) ---
+      {
+        id: 'frappe-caramel-macchiato',
+        category: 'FRAPPE',
+        name: 'Caramel Macchiato',
+        price: 120,
+        style: 'caramel-frappe',
+        desc: 'Smooth blended coffee with rich caramel ribbon drizzle and fluffy whipped cream.'
+      },
+      {
+        id: 'frappe-pure-matcha-latte',
+        category: 'FRAPPE',
+        name: 'Pure Matcha Latte',
+        price: 130,
+        style: 'matcha-frappe',
+        desc: 'Vibrant green tea blended with creamy milk and topped with matcha-dusted whip.'
+      },
+      {
+        id: 'frappe-java-chip',
+        category: 'FRAPPE',
+        name: 'Java Chip',
+        price: 130,
+        style: 'java-frappe',
+        desc: 'Bold roasted coffee blended with crunchy dark chocolate chips and cocoa swirl.'
+      },
+      {
+        id: 'frappe-vanilla',
+        category: 'FRAPPE',
+        name: 'Vanilla',
+        price: 110,
+        style: 'vanilla-frappe',
+        desc: 'Clean, creamy Madagascar-style vanilla bean frappe crowned with sweet whip.'
+      },
+      {
+        id: 'frappe-cookies-cream',
+        category: 'FRAPPE',
+        name: 'Cookies & Cream',
+        price: 120,
+        style: 'cookies-frappe',
+        desc: 'Crushed chocolate sandwich cookies folded into a frosty cream base with a whole cookie.'
+      },
+      {
+        id: 'frappe-strawberry',
+        category: 'FRAPPE',
+        name: 'Strawberry',
+        price: 120,
+        style: 'strawberry-frappe',
+        desc: 'Sweet strawberry puree blended icy smooth with whipped cream and berry topping.'
+      },
+      {
+        id: 'frappe-lotus-biscoff',
+        category: 'FRAPPE',
+        name: 'Lotus Biscoff Frappe',
+        price: 150,
+        style: 'biscoff-frappe',
+        desc: 'Spiced caramelized biscuit frappe loaded with Biscoff crumble and a signature biscuit.'
+      },
+      {
+        id: 'frappe-mocha',
+        category: 'FRAPPE',
+        name: 'Mocha',
+        price: 120,
+        style: 'mocha-frappe',
+        desc: 'Rich dark chocolate sauce blended with espresso notes and chocolate drizzle.'
+      },
+
+      // --- BUTTERPUP SERIES ---
+      {
+        id: 'butterpup-golden-frappe',
+        category: 'BUTTERPUP SERIES',
+        name: 'Golden Butterpup Frappe',
+        price: 145,
+        style: 'caramel-frappe',
+        desc: 'Our signature butterscotch cream frappe with golden caramel swirl and toasted whip.'
+      },
+      {
+        id: 'butterpup-caramel-cloud',
+        category: 'BUTTERPUP SERIES',
+        name: 'Butterpup Caramel Cloud',
+        price: 140,
+        style: 'vanilla-frappe',
+        desc: 'Iced butter-caramel latte topped with an airy, sweet butterpup cloud foam.'
+      },
+      {
+        id: 'butterpup-espresso-cream',
+        category: 'BUTTERPUP SERIES',
+        name: 'Butterpup Espresso Cream',
+        price: 150,
+        style: 'mocha-frappe',
+        desc: 'Double-shot espresso balanced with warm butterscotch sweetness and cream.'
+      },
+      {
+        id: 'butterpup-honey-oat',
+        category: 'BUTTERPUP SERIES',
+        name: 'Butterpup Honey Swirl',
+        price: 145,
+        style: 'biscoff-frappe',
+        desc: 'Golden wildflower honey and butterscotch cream over crushed ice.'
+      },
+
+      // --- MATCHA SERIES ---
+      {
+        id: 'matcha-pure-latte',
+        category: 'MATCHA SERIES',
+        name: 'Pure Matcha Latte',
+        price: 130,
+        style: 'matcha-frappe',
+        desc: ' Whisked ceremonial matcha poured over chilled fresh milk.'
+      },
+      {
+        id: 'matcha-ceremonial-cloud',
+        category: 'MATCHA SERIES',
+        name: 'Ceremonial Matcha Cloud',
+        price: 145,
+        style: 'matcha-frappe',
+        desc: 'Rich green tea base topped with thick salted-vanilla sweet cream cap.'
+      },
+      {
+        id: 'matcha-iced-espresso',
+        category: 'MATCHA SERIES',
+        name: 'Iced Matcha Espresso',
+        price: 140,
+        style: 'caramel-frappe',
+        desc: 'Layered earthy matcha, milk, and a bold shot of GOLDEN HOUR espresso.'
+      },
+      {
+        id: 'matcha-white-choco',
+        category: 'MATCHA SERIES',
+        name: 'White Choco Matcha',
+        price: 145,
+        style: 'matcha-frappe',
+        desc: 'Creamy white chocolate paired with vibrant green tea for a smooth finish.'
+      },
+
+      // --- MANGO SERIES ---
+      {
+        id: 'mango-golden-frappe',
+        category: 'MANGO SERIES',
+        name: 'Golden Mango Frappe',
+        price: 135,
+        style: 'mango-frappe',
+        desc: 'Sweet Philippine mango blended into a bright golden frost with whipped cream.'
+      },
+      {
+        id: 'mango-graham-cream',
+        category: 'MANGO SERIES',
+        name: 'Mango Graham Cream',
+        price: 145,
+        style: 'mango-frappe',
+        desc: 'Tropical mango and sweet cream layered with buttery crushed graham crumbs.'
+      },
+      {
+        id: 'mango-iced-matcha',
+        category: 'MANGO SERIES',
+        name: 'Iced Mango Matcha',
+        price: 140,
+        style: 'matcha-frappe',
+        desc: 'Bright golden mango base layered beneath earthy green tea.'
+      },
+      {
+        id: 'mango-sparkling-cooler',
+        category: 'MANGO SERIES',
+        name: 'Sparkling Mango Cooler',
+        price: 125,
+        style: 'mango-frappe',
+        desc: 'Crisp, refreshing mango citrus cooler served chilled over ice.'
+      },
+
+      // --- STRAWBERRY SERIES ---
+      {
+        id: 'strawberry-frappe-item',
+        category: 'STRAWBERRY SERIES',
+        name: 'Strawberry Frappe',
+        price: 120,
+        style: 'strawberry-frappe',
+        desc: 'Classic frosty strawberry frappe topped with fluffy whipped cream.'
+      },
+      {
+        id: 'strawberry-cream-latte',
+        category: 'STRAWBERRY SERIES',
+        name: 'Strawberry Cream Latte',
+        price: 135,
+        style: 'strawberry-frappe',
+        desc: 'Sweet strawberry compote and cold milk swirled together for a creamy treat.'
+      },
+      {
+        id: 'strawberry-matcha-swirl',
+        category: 'STRAWBERRY SERIES',
+        name: 'Strawberry Matcha Swirl',
+        price: 145,
+        style: 'strawberry-frappe',
+        desc: 'Ruby strawberry milk layered under rich green matcha.'
+      },
+      {
+        id: 'strawberry-berry-whipped',
+        category: 'STRAWBERRY SERIES',
+        name: 'Berry Whipped Frappe',
+        price: 135,
+        style: 'strawberry-frappe',
+        desc: 'Extra-berry blended frappe finished with whipped cream and berry drizzle.'
+      },
+
+      // --- WHITE CHOCO SERIES ---
+      {
+        id: 'white-choco-frappe',
+        category: 'WHITE CHOCO SERIES',
+        name: 'White Choco Frappe',
+        price: 130,
+        style: 'vanilla-frappe',
+        desc: 'Velvety white chocolate blended with ice and topped with whipped cream.'
+      },
+      {
+        id: 'white-choco-mocha',
+        category: 'WHITE CHOCO SERIES',
+        name: 'White Choco Mocha',
+        price: 135,
+        style: 'caramel-frappe',
+        desc: 'Espresso and sweet white chocolate combined in a smooth coffeehouse classic.'
+      },
+      {
+        id: 'white-choco-toasted-latte',
+        category: 'WHITE CHOCO SERIES',
+        name: 'Toasted White Choco Latte',
+        price: 140,
+        style: 'biscoff-frappe',
+        desc: 'Caramelized white chocolate notes with warm roasted undertones.'
+      },
+      {
+        id: 'white-choco-berry',
+        category: 'WHITE CHOCO SERIES',
+        name: 'White Choco Berry',
+        price: 140,
+        style: 'strawberry-frappe',
+        desc: 'Creamy white chocolate accented with sweet strawberry swirl.'
+      },
+
+      // --- CLASSIC ---
+      {
+        id: 'classic-americano',
+        category: 'CLASSIC',
+        name: 'Golden Hour Americano',
+        price: 100,
+        style: 'classic-coffee',
+        desc: 'Bold espresso shots diluted with hot or iced water—clean, aromatic, and balanced.'
+      },
+      {
+        id: 'classic-caramel-latte',
+        category: 'CLASSIC',
+        name: 'Classic Caramel Latte',
+        price: 125,
+        style: 'caramel-frappe',
+        desc: 'Smooth espresso and steamed or iced milk finished with golden caramel.'
+      },
+      {
+        id: 'classic-spanish-latte',
+        category: 'CLASSIC',
+        name: 'Spanish Latte',
+        price: 130,
+        style: 'classic-coffee',
+        desc: 'Rich espresso meets condensed and fresh milk for a creamy, sweet balance.'
+      },
+      {
+        id: 'classic-brewed-coffee',
+        category: 'CLASSIC',
+        name: 'Classic Brewed Coffee',
+        price: 95,
+        style: 'classic-coffee',
+        desc: 'Freshly brewed single-origin beans harvested year-round with warm cocoa notes.'
+      },
+
+      // --- COOKIES ---
+      {
+        id: 'cookies-cream-item',
+        category: 'COOKIES',
+        name: 'Cookies & Cream',
+        price: 120,
+        style: 'cookies-frappe',
+        desc: 'Crunchy chocolate cookie bits blended with cold cream and topped with a cookie.'
+      },
+      {
+        id: 'cookies-double-crumble',
+        category: 'COOKIES',
+        name: 'Double Cookie Crumble Frappe',
+        price: 140,
+        style: 'cookies-frappe',
+        desc: 'Extra cookie crunch inside and on top with a rich chocolate cream base.'
+      },
+      {
+        id: 'cookies-butter-latte',
+        category: 'COOKIES',
+        name: 'Cookie Butter Latte',
+        price: 145,
+        style: 'biscoff-frappe',
+        desc: 'Spiced speculoos cookie butter blended with smooth milk and coffee.'
+      },
+      {
+        id: 'cookies-choco-chip-frappe',
+        category: 'COOKIES',
+        name: 'Choco Chip Cookie Frappe',
+        price: 135,
+        style: 'java-frappe',
+        desc: 'Baked-cookie flavor with chocolate chips and whipped cream.'
+      },
+
+      // --- TEA ---
+      {
+        id: 'tea-golden-peach',
+        category: 'TEA',
+        name: 'Golden Peach Tea',
+        price: 115,
+        style: 'mango-frappe',
+        desc: 'Fragrant steeped tea infused with sweet sun-kissed peach.'
+      },
+      {
+        id: 'tea-honey-lemon-green',
+        category: 'TEA',
+        name: 'Honey Lemon Green Tea',
+        price: 115,
+        style: 'matcha-frappe',
+        desc: 'Bright green tea brightened with zesty lemon and pure honey.'
+      },
+      {
+        id: 'tea-roasted-oolong-milk',
+        category: 'TEA',
+        name: 'Roasted Oolong Milk Tea',
+        price: 125,
+        style: 'classic-coffee',
+        desc: 'Toasted oolong leaves steeped with creamy milk for a warm, nutty finish.'
+      },
+      {
+        id: 'tea-berry-hibiscus',
+        category: 'TEA',
+        name: 'Berry Hibiscus Tea',
+        price: 120,
+        style: 'strawberry-frappe',
+        desc: 'Ruby hibiscus infusion with tangy berry notes served crisp over ice.'
+      }
+    ];
+
+    // Customization Options
+    const SIZE_OPTIONS = [
+      { id: 'Regular', label: 'Regular', delta: 0 },
+      { id: 'Large', label: 'Large', delta: 20 },
+      { id: 'Grande', label: 'Grande', delta: 35 }
+    ];
+
+    const SWEETNESS_OPTIONS = [
+      { id: '0% No Sugar', label: '0% No Sugar' },
+      { id: '25% Less Sweet', label: '25% Less Sweet' },
+      { id: '50% Half Sweet', label: '50% Half Sweet' },
+      { id: '100% Standard', label: '100% Standard' }
+    ];
+
+    const ICE_OPTIONS = [
+      { id: 'No Ice', label: 'No Ice' },
+      { id: 'Less Ice', label: 'Less Ice' },
+      { id: 'Regular Ice', label: 'Regular Ice' },
+      { id: 'Extra Ice', label: 'Extra Ice' }
+    ];
+
+    const MILK_OPTIONS = [
+      { id: 'Whole Milk', label: 'Whole Milk', delta: 0 },
+      { id: 'Oat Milk', label: 'Oat Milk', delta: 25 },
+      { id: 'Almond Milk', label: 'Almond Milk', delta: 25 },
+      { id: 'Breve / Cream', label: 'Breve / Cream', delta: 20 }
+    ];
+
+    const ADDON_OPTIONS = [
+      { id: 'Extra Espresso Shot', label: 'Extra Espresso Shot', delta: 30 },
+      { id: 'Whipped Cream', label: 'Whipped Cream', delta: 15 },
+      { id: 'Caramel Drizzle', label: 'Caramel Drizzle', delta: 15 },
+      { id: 'Biscoff Crumble', label: 'Biscoff Crumble', delta: 25 },
+      { id: 'Pearl / Jelly', label: 'Pearl / Jelly', delta: 20 }
+    ];
+
+    const DAILY_CHECKIN_DAYS = [
+      { day: 1, label: 'DAY 1', pts: 1 },
+      { day: 2, label: 'DAY 2', pts: 1 },
+      { day: 3, label: 'DAY 3', pts: 1 },
+      { day: 4, label: 'DAY 4', pts: 2 },
+      { day: 5, label: 'DAY 5', pts: 2 },
+      { day: 6, label: 'DAY 6', pts: 3 },
+      { day: 7, label: 'DAY 7', pts: 21 }
+    ];
+
+    const REDEEMABLE_DRINKS = [
+      {
+        id: 'redeem-caramel-macchiato',
+        drinkId: 'frappe-caramel-macchiato',
+        name: 'Caramel Macchiato',
+        cost: 30,
+        style: 'caramel-frappe'
+      },
+      {
+        id: 'redeem-lotus-biscoff',
+        drinkId: 'frappe-lotus-biscoff',
+        name: 'Lotus Biscoff Frappe',
+        cost: 35,
+        style: 'biscoff-frappe'
+      },
+      {
+        id: 'redeem-pure-matcha',
+        drinkId: 'frappe-pure-matcha-latte',
+        name: 'Pure Matcha Latte',
+        cost: 32,
+        style: 'matcha-frappe'
+      }
+    ];
+
+    // -----------------------------------------------------------------------
+    // 2. APPLICATION STATE
+    // -----------------------------------------------------------------------
+    const state = {
+      currentView: 'home',
+      activeCategory: 'FRAPPE',
+      searchQuery: '',
+      points: 40,
+      claimedDays: [],
+      redeemedVouchers: [],
+      orderBag: [],
+      orderHistory: [],
+      member: {
+        loggedIn: false,
+        phone: '',
+        channel: '',
+        generatedOtp: ''
+      },
+      customizing: {
+        item: null,
+        size: SIZE_OPTIONS[0],
+        sweetness: SWEETNESS_OPTIONS[3],
+        ice: ICE_OPTIONS[2],
+        milk: MILK_OPTIONS[0],
+        addons: [],
+        notes: '',
+        qty: 1
+      }
+    };
+
+    // -----------------------------------------------------------------------
+    // 3. CUSTOM SVG DRINK ARTWORK GENERATOR (Appetizing, Crisp & Reliable)
+    // -----------------------------------------------------------------------
+    function renderDrinkArtworkSVG(style, sizeClass = 'w-28 h-36') {
+      const palettes = {
+        'caramel-frappe': {
+          cupTop: '#f3dec0',
+          cupBottom: '#d9b589',
+          drizzle: '#b86b28',
+          whip: '#fff9f0',
+          straw: '#1f120b',
+          badge: null
+        },
+        'matcha-frappe': {
+          cupTop: '#6b9e3b',
+          cupBottom: '#4b7824',
+          drizzle: '#9bc958',
+          whip: '#eef7df',
+          straw: '#2c180e',
+          badge: 'matcha'
+        },
+        'java-frappe': {
+          cupTop: '#85583a',
+          cupBottom: '#593722',
+          drizzle: '#331b0e',
+          whip: '#fff7ec',
+          straw: '#1f120b',
+          badge: 'chips'
+        },
+        'vanilla-frappe': {
+          cupTop: '#faf0df',
+          cupBottom: '#e8d5b7',
+          drizzle: '#f2c66d',
+          whip: '#ffffff',
+          straw: '#f5efe6',
+          badge: null
+        },
+        'cookies-frappe': {
+          cupTop: '#a6978d',
+          cupBottom: '#78685f',
+          drizzle: '#2b1b14',
+          whip: '#f5efe8',
+          straw: '#1f120b',
+          badge: 'cookie'
+        },
+        'strawberry-frappe': {
+          cupTop: '#f7b2c4',
+          cupBottom: '#e06d8c',
+          drizzle: '#c92a54',
+          whip: '#fff7f9',
+          straw: '#ffffff',
+          badge: 'berry'
+        },
+        'biscoff-frappe': {
+          cupTop: '#e7b978',
+          cupBottom: '#c28842',
+          drizzle: '#8f531b',
+          whip: '#fff5e4',
+          straw: '#5e3312',
+          badge: 'biscoff'
+        },
+        'mocha-frappe': {
+          cupTop: '#7c4b2b',
+          cupBottom: '#4d2b16',
+          drizzle: '#261207',
+          whip: '#fff7ec',
+          straw: '#1f120b',
+          badge: null
+        },
+        'mango-frappe': {
+          cupTop: '#ffcf4d',
+          cupBottom: '#f2991d',
+          drizzle: '#e06d00',
+          whip: '#fff9e6',
+          straw: '#3b200b',
+          badge: 'mango'
+        },
+        'classic-coffee': {
+          cupTop: '#6d3f22',
+          cupBottom: '#432310',
+          drizzle: '#a66b3c',
+          whip: '#e8d2b5',
+          straw: '#1f120b',
+          badge: null
+        }
+      };
+
+      const p = palettes[style] || palettes['caramel-frappe'];
+
+      return `
+        <svg class="${sizeClass} mx-auto drop-shadow-[0_10px_12px_rgba(0,0,0,0.42)] transition-transform duration-300 group-hover:scale-105" viewBox="0 0 110 140">
+          <!-- Straw -->
+          <rect x="65" y="10" width="6" height="45" rx="2" transform="rotate(10 68 32)" fill="${p.straw}" stroke="#1b0e08" stroke-width="1.5" />
+
+          <!-- Whipped Cream Dome -->
+          <path d="M26 52 C22 44 30 37 38 39 C40 29 52 26 58 34 C66 28 77 33 76 43 C84 44 86 52 80 56 Z" fill="${p.whip}" stroke="#2b170d" stroke-width="2" stroke-linejoin="round" />
+
+          <!-- Optional Topping Accent -->
+          ${p.badge === 'cookie' ? `<circle cx="72" cy="36" r="10" fill="#2b1c15" stroke="#140c08" stroke-width="2"/><circle cx="72" cy="36" r="4" fill="#4f392e"/>` : ''}
+          ${p.badge === 'biscoff' ? `<rect x="40" y="12" width="28" height="19" rx="3" fill="#c97d32" stroke="#5e320c" stroke-width="2"/><path d="M45 18h18M45 24h18" stroke="#8f5016" stroke-width="1.5"/>` : ''}
+          ${p.badge === 'berry' ? `<ellipse cx="66" cy="35" rx="7" ry="6" fill="#d62849" stroke="#5e0d1c" stroke-width="1.5"/>` : ''}
+
+          <!-- Tapered Plastic Cup -->
+          <path d="M27 54 L83 54 L75 128 L35 128 Z" fill="${p.cupTop}" stroke="#26140b" stroke-width="2.2" stroke-linejoin="round" />
+          <path d="M30 88 L80 88 L75 128 L35 128 Z" fill="${p.cupBottom}" opacity="0.82" />
+
+          <!-- Caramel / Sauce Drizzle -->
+          <path d="M36 56 C34 72 41 84 37 105" fill="none" stroke="${p.drizzle}" stroke-width="3.2" stroke-linecap="round" />
+          <path d="M55 56 C52 78 60 92 56 116" fill="none" stroke="${p.drizzle}" stroke-width="2.8" stroke-linecap="round" />
+          <path d="M72 56 C75 74 68 90 71 112" fill="none" stroke="${p.drizzle}" stroke-width="3" stroke-linecap="round" />
+
+          <!-- Cup Rim & Gloss Highlight -->
+          <rect x="25" y="51" width="60" height="6" rx="2.5" fill="#fffaf2" fill-opacity="0.65" stroke="#26140b" stroke-width="1.8" />
+          <line x1="34" y1="64" x2="38" y2="118" stroke="#ffffff" stroke-width="2.2" stroke-opacity="0.35" stroke-linecap="round" />
+        </svg>
+      `;
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. PIXEL-ART COFFEE SHOP SCENE (Home Page Background - 1000001507.png)
+    // -----------------------------------------------------------------------
+    function drawPixelCoffeeShop() {
+      const canvas = document.getElementById('pixelShopCanvas');
+      if (!canvas) return;
+
+      const parent = canvas.parentElement;
+      const w = Math.max(320, parent.clientWidth);
+      const h = Math.max(420, parent.clientHeight);
+
+      // Render on a crisp low-res pixel grid (e.g., 320px wide) scaled cleanly
+      const pixelW = 320;
+      const pixelH = Math.max(180, Math.round((h / w) * pixelW));
+      canvas.width = pixelW;
+      canvas.height = pixelH;
+
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      // Brick Wall Base
+      ctx.fillStyle = '#4a2518';
+      ctx.fillRect(0, 0, pixelW, pixelH);
+
+      const brickH = 8;
+      const brickW = 16;
+      for (let row = 0; row < Math.ceil(pixelH / brickH); row++) {
+        const y = row * brickH;
+        const offset = (row % 2) * (brickW / 2);
+        for (let col = -1; col < Math.ceil(pixelW / brickW) + 1; col++) {
+          const x = col * brickW + offset;
+          ctx.fillStyle = ((row + col) % 3 === 0) ? '#6e3722' : ((row + col) % 2 === 0) ? '#5e2e1c' : '#522717';
+          ctx.fillRect(x + 1, y + 1, brickW - 2, brickH - 2);
+        }
+      }
+
+      // Windows on left & right
+      function drawWindow(wx, wy, ww, wh) {
+        ctx.fillStyle = '#191d26';
+        ctx.fillRect(wx, wy, ww, wh);
+        ctx.fillStyle = '#323a4a';
+        ctx.fillRect(wx + 2, wy + 2, ww - 4, wh - 4);
+        // Diagonal glass reflection
+        ctx.fillStyle = '#5c6b82';
+        for (let i = 0; i < Math.min(ww, wh); i++) {
+          ctx.fillRect(wx + 4 + i, wy + wh - 6 - i, 4, 2);
+        }
+        // Window frame
+        ctx.fillStyle = '#24130b';
+        ctx.fillRect(wx, wy, ww, 2);
+        ctx.fillRect(wx, wy + wh - 2, ww, 2);
+        ctx.fillRect(wx, wy, 2, wh);
+        ctx.fillRect(wx + ww - 2, wy, 2, wh);
+      }
+
+      drawWindow(4, 18, 44, 72);
+      drawWindow(pixelW - 52, 18, 48, 72);
+
+      // Chalkboard Menu Sign in Center-Top
+      const boardX = Math.floor(pixelW * 0.25);
+      const boardY = 10;
+      const boardW = Math.floor(pixelW * 0.48);
+      const boardH = 54;
+      ctx.fillStyle = '#d8a66c';
+      ctx.fillRect(boardX - 2, boardY - 2, boardW + 4, boardH + 4);
+      ctx.fillStyle = '#232524';
+      ctx.fillRect(boardX, boardY, boardW, boardH);
+
+      // Chalk lines & "Coffee" motif
+      ctx.fillStyle = '#e8e4dc';
+      ctx.fillRect(boardX + 10, boardY + 12, 26, 3);
+      ctx.fillRect(boardX + 14, boardY + 17, 18, 2);
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(boardX + 48, boardY + 10 + i * 9, 44, 2);
+        ctx.fillRect(boardX + 98, boardY + 10 + i * 9, 10, 2);
+      }
+
+      // Pendant Lamps
+      [78, 162, 256].forEach((lx) => {
+        ctx.fillStyle = '#181412';
+        ctx.fillRect(lx + 7, 0, 2, 18);
+        ctx.fillStyle = '#252932';
+        ctx.fillRect(lx, 18, 16, 5);
+        ctx.fillRect(lx - 2, 23, 20, 3);
+        ctx.fillStyle = '#ffe58f';
+        ctx.fillRect(lx + 4, 26, 8, 2);
+      });
+
+      // Wooden Shelf with Jars & Cups
+      const shelfY = 82;
+      ctx.fillStyle = '#c48b52';
+      ctx.fillRect(88, shelfY, 152, 5);
+      ctx.fillStyle = '#7d4e28';
+      ctx.fillRect(88, shelfY + 5, 152, 2);
+
+      // Jars on shelf
+      ctx.fillStyle = '#e8e8e8';
+      ctx.fillRect(98, shelfY - 9, 8, 9);
+      ctx.fillRect(110, shelfY - 9, 8, 9);
+      ctx.fillStyle = '#b8292f';
+      ctx.fillRect(168, shelfY - 12, 10, 12);
+      ctx.fillStyle = '#f3c669';
+      ctx.fillRect(168, shelfY - 14, 10, 2);
+      ctx.fillStyle = '#6b4423';
+      ctx.fillRect(184, shelfY - 10, 8, 10);
+      ctx.fillStyle = '#e67e22';
+      ctx.fillRect(198, shelfY - 13, 12, 13);
+
+      // Espresso Machine & Coffee Pots on Countertop
+      const counterTopY = Math.floor(pixelH * 0.62);
+      ctx.fillStyle = '#8f98a3';
+      ctx.fillRect(32, counterTopY - 26, 36, 26);
+      ctx.fillStyle = '#3b424c';
+      ctx.fillRect(35, counterTopY - 22, 16, 10);
+      ctx.fillStyle = '#e63946';
+      ctx.fillRect(76, counterTopY - 22, 10, 22);
+      ctx.fillStyle = '#219ebc';
+      ctx.fillRect(89, counterTopY - 22, 10, 22);
+
+      // Glass Carafe & Kettle
+      ctx.fillStyle = '#5c3419';
+      ctx.fillRect(122, counterTopY - 16, 18, 14);
+      ctx.fillStyle = '#dce6f2';
+      ctx.fillRect(122, counterTopY - 18, 18, 3);
+      ctx.fillStyle = '#2b303a';
+      ctx.fillRect(204, counterTopY - 22, 16, 22);
+
+      // Countertop Wood Plank
+      ctx.fillStyle = '#d49a5d';
+      ctx.fillRect(0, counterTopY, pixelW, 8);
+      ctx.fillStyle = '#875329';
+      ctx.fillRect(0, counterTopY + 8, pixelW, 4);
+
+      // Lower Counter Front & Bar Stools
+      ctx.fillStyle = '#4a2715';
+      ctx.fillRect(0, counterTopY + 12, pixelW, pixelH - counterTopY);
+
+      const stoolPositions = [24, 72, 194, 244, 294];
+      stoolPositions.forEach((sx) => {
+        // Stool cushion
+        ctx.fillStyle = '#a8b0b8';
+        ctx.fillRect(sx, counterTopY + 14, 28, 7);
+        ctx.fillStyle = '#6c757d';
+        ctx.fillRect(sx, counterTopY + 21, 28, 3);
+        // Legs
+        ctx.fillStyle = '#26292e';
+        ctx.fillRect(sx + 4, counterTopY + 24, 3, pixelH - counterTopY);
+        ctx.fillRect(sx + 21, counterTopY + 24, 3, pixelH - counterTopY);
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // 5. NAVIGATION & SEARCH HANDLERS
+    // -----------------------------------------------------------------------
+    function navigateTo(viewName, categoryOverride = null) {
+      state.currentView = viewName;
+
+      document.querySelectorAll('.view-section').forEach((sec) => {
+        sec.classList.add('hidden');
+      });
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Highlight active nav link
+      document.querySelectorAll('.nav-link').forEach((btn) => {
+        btn.classList.remove('font-extrabold', 'italic', 'text-white', 'underline', 'decoration-[#f3c669]', 'decoration-2', 'underline-offset-4');
+        btn.classList.add('font-semibold');
+      });
+
+      const activeNav = document.getElementById(`nav-${viewName}`);
+      if (activeNav) {
+        activeNav.classList.remove('font-semibold');
+        activeNav.classList.add('font-extrabold', 'italic', 'text-white', 'underline', 'decoration-[#f3c669]', 'decoration-2', 'underline-offset-4');
+      }
+
+      if (viewName === 'home') {
+        drawPixelCoffeeShop();
+        updateHomePointsPreview();
+      } else if (viewName === 'menu') {
+        if (categoryOverride) {
+          state.activeCategory = categoryOverride;
+        }
+        renderSidebarCategories();
+        renderMenuGrid();
+      } else if (viewName === 'rewards') {
+        renderRewardsView();
+      } else if (viewName === 'account') {
+        renderAccountView();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleSearchInput(val) {
+      state.searchQuery = val.trim();
+      const topInput = document.getElementById('topSearchInput');
+      const mobInput = document.getElementById('mobileSearchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+
+      if (topInput && topInput.value !== val) topInput.value = val;
+      if (mobInput && mobInput.value !== val) mobInput.value = val;
+      if (clearBtn) clearBtn.classList.toggle('hidden', !state.searchQuery);
+
+      if (state.searchQuery.length > 0) {
+        if (state.currentView !== 'menu') {
+          state.currentView = 'menu';
+          document.querySelectorAll('.view-section').forEach((s) => s.classList.add('hidden'));
+          document.getElementById('view-menu').classList.remove('hidden');
+        }
+        renderSidebarCategories();
+        renderMenuGrid();
+      } else if (state.currentView === 'menu') {
+        renderSidebarCategories();
+        renderMenuGrid();
+      }
+    }
+
+    function submitSearch(val) {
+      handleSearchInput(val);
+      navigateTo('menu');
+    }
+
+    function clearSearch() {
+      state.searchQuery = '';
+      const topInput = document.getElementById('topSearchInput');
+      const mobInput = document.getElementById('mobileSearchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (topInput) topInput.value = '';
+      if (mobInput) mobInput.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+      renderSidebarCategories();
+      renderMenuGrid();
+    }
+
+    // -----------------------------------------------------------------------
+    // 6. MENU SIDEBAR & DRINKS GRID RENDERING
+    // -----------------------------------------------------------------------
+    function renderSidebarCategories() {
+      const container = document.getElementById('categorySidebarList');
+      if (!container) return;
+
+      container.innerHTML = CATEGORIES.map((cat) => {
+        const isActive = !state.searchQuery && state.activeCategory === cat.id;
+        const formattedLabel = cat.label.replace('\n', '<br class="hidden md:inline" />');
+        return `
+          <button
+            type="button"
+            onclick="selectCategory('${cat.id}')"
+            class="px-4 py-4 md:py-5 text-center text-xs sm:text-[13px] tracking-wider uppercase shrink-0 md:shrink transition cursor-pointer ${
+              isActive
+                ? 'bg-[#28140b] text-[#ffffff] font-black border-b-2 md:border-b-0 md:border-l-4 border-[#f3c669] shadow-inner'
+                : 'text-[#e8d5c2] hover:bg-[#3d2012] hover:text-white font-bold'
+            }"
+          >
+            ${formattedLabel}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(catId) {
+      state.searchQuery = '';
+      const topInput = document.getElementById('topSearchInput');
+      const mobInput = document.getElementById('mobileSearchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (topInput) topInput.value = '';
+      if (mobInput) mobInput.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+
+      state.activeCategory = catId;
+      renderSidebarCategories();
+      renderMenuGrid();
+    }
+
+    function renderMenuGrid() {
+      const grid = document.getElementById('menuDrinksGrid');
+      const emptyState = document.getElementById('emptyMenuState');
+      const titleEl = document.getElementById('activeCategoryTitle');
+      const descEl = document.getElementById('activeCategoryDesc');
+      const countEl = document.getElementById('menuItemCount');
+      const searchBadge = document.getElementById('searchActiveBadge');
+
+      let items = [];
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        items = MENU_ITEMS.filter(
+          (item) =>
+            item.name.toLowerCase().includes(q) ||
+            item.category.toLowerCase().includes(q) ||
+            item.desc.toLowerCase().includes(q)
+        );
+        titleEl.textContent = `SEARCH: "${state.searchQuery}"`;
+        descEl.textContent = `Showing matching drinks across all GOLDEN HOUR categories. Tap any drink to customize.`;
+        searchBadge.classList.remove('hidden');
+      } else {
+        items = MENU_ITEMS.filter((item) => item.category === state.activeCategory);
+        const catObj = CATEGORIES.find((c) => c.id === state.activeCategory);
+        titleEl.textContent = catObj ? catObj.id : state.activeCategory;
+        descEl.textContent = catObj ? catObj.desc : '';
+        searchBadge.classList.add('hidden');
+      }
+
+      countEl.textContent = `${items.length} ${items.length === 1 ? 'ITEM' : 'ITEMS'}`;
+
+      if (items.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = items.map((item) => `
+        <article
+          onclick="openCustomizeModal('${item.id}')"
+          role="button"
+          tabindex="0"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCustomizeModal('${item.id}');}"
+          class="group cursor-pointer flex flex-col items-center text-center rounded-3xl p-4 bg-[#4a2616]/45 hover:bg-[#3d1e11] border border-transparent hover:border-[#f3c669]/45 transition shadow-sm hover:shadow-xl"
+        >
+          <div class="w-full flex items-center justify-center mb-2">
+            ${renderDrinkArtworkSVG(item.style, 'w-28 h-36')}
+          </div>
+
+          <div class="font-mono text-sm sm:text-base font-bold text-[#fff5e6] tracking-wide">
+            ₱ ${item.price}
+          </div>
+
+          <h3 class="text-base sm:text-lg font-extrabold text-[#ffffff] leading-snug mt-0.5 group-hover:text-[#f3c669] transition">
+            ${item.name}
+          </h3>
+
+          <p class="text-xs text-[#e0c2a6] line-clamp-2 mt-1.5 px-1">
+            ${item.desc}
+          </p>
+
+          <span class="mt-3 inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-[#1f120b] bg-[#f3c669] group-hover:bg-[#ffd67d] px-3.5 py-1.5 rounded-full shadow transition">
+            Customize & Order
+          </span>
+        </article>
+      `).join('');
+    }
+
+    // -----------------------------------------------------------------------
+    // 7. DRINK CUSTOMIZATION MODAL LOGIC
+    // -----------------------------------------------------------------------
+    function openCustomizeModal(itemId) {
+      const item = MENU_ITEMS.find((m) => m.id === itemId);
+      if (!item) return;
+
+      state.customizing = {
+        item,
+        size: SIZE_OPTIONS[0],
+        sweetness: SWEETNESS_OPTIONS[3],
+        ice: ICE_OPTIONS[2],
+        milk: MILK_OPTIONS[0],
+        addons: [],
+        notes: '',
+        qty: 1
+      };
+
+      document.getElementById('customCategoryTag').textContent = item.category;
+      document.getElementById('customDrinkName').textContent = item.name;
+      document.getElementById('customDrinkDesc').textContent = item.desc;
+      document.getElementById('customBasePrice').textContent = `₱${item.price}`;
+      document.getElementById('customDrinkArtwork').innerHTML = renderDrinkArtworkSVG(item.style, 'w-24 h-28');
+      document.getElementById('customNotesInput').value = '';
+      document.getElementById('customQtyValue').textContent = '1';
+
+      renderCustomizationControls();
+      updateCustomLiveTotal();
+
+      document.getElementById('customizeModal').classList.remove('hidden');
+    }
+
+    function closeCustomizeModal() {
+      document.getElementById('customizeModal').classList.add('hidden');
+    }
+
+    function renderCustomizationControls() {
+      // Size
+      document.getElementById('sizeOptionsGroup').innerHTML = SIZE_OPTIONS.map((opt) => {
+        const active = state.customizing.size.id === opt.id;
+        return `
+          <button
+            type="button"
+            onclick="selectCustomSize('${opt.id}')"
+            class="px-3 py-2.5 rounded-xl text-xs font-bold border transition text-center ${
+              active
+                ? 'bg-[#f3c669] text-[#1f120b] border-[#f3c669] font-extrabold shadow'
+                : 'bg-[#1d0f08] text-[#ead2ba] border-[#57321f] hover:border-[#b57b4c]'
+            }"
+          >
+            <div>${opt.label}</div>
+            <div class="font-mono text-[10px] opacity-85">${opt.delta === 0 ? 'Included' : `+₱${opt.delta}`}</div>
+          </button>
+        `;
+      }).join('');
+
+      // Sweetness
+      document.getElementById('sweetnessOptionsGroup').innerHTML = SWEETNESS_OPTIONS.map((opt) => {
+        const active = state.customizing.sweetness.id === opt.id;
+        return `
+          <button
+            type="button"
+            onclick="selectCustomSweetness('${opt.id}')"
+            class="px-2.5 py-2 rounded-xl text-[11px] font-bold border transition ${
+              active
+                ? 'bg-[#f3c669] text-[#1f120b] border-[#f3c669] font-extrabold'
+                : 'bg-[#1d0f08] text-[#ead2ba] border-[#57321f] hover:border-[#b57b4c]'
+            }"
+          >
+            ${opt.label}
+          </button>
+        `;
+      }).join('');
+
+      // Ice
+      document.getElementById('iceOptionsGroup').innerHTML = ICE_OPTIONS.map((opt) => {
+        const active = state.customizing.ice.id === opt.id;
+        return `
+          <button
+            type="button"
+            onclick="selectCustomIce('${opt.id}')"
+            class="px-2.5 py-2 rounded-xl text-[11px] font-bold border transition ${
+              active
+                ? 'bg-[#f3c669] text-[#1f120b] border-[#f3c669] font-extrabold'
+                : 'bg-[#1d0f08] text-[#ead2ba] border-[#57321f] hover:border-[#b57b4c]'
+            }"
+          >
+            ${opt.label}
+          </button>
+        `;
+      }).join('');
+
+      // Milk
+      document.getElementById('milkOptionsGroup').innerHTML = MILK_OPTIONS.map((opt) => {
+        const active = state.customizing.milk.id === opt.id;
+        return `
+          <button
+            type="button"
+            onclick="selectCustomMilk('${opt.id}')"
+            class="px-2.5 py-2 rounded-xl text-[11px] font-bold border transition text-center ${
+              active
+                ? 'bg-[#f3c669] text-[#1f120b] border-[#f3c669] font-extrabold'
+                : 'bg-[#1d0f08] text-[#ead2ba] border-[#57321f] hover:border-[#b57b4c]'
+            }"
+          >
+            <div>${opt.label}</div>
+            <div class="font-mono text-[10px] opacity-85">${opt.delta === 0 ? 'Standard' : `+₱${opt.delta}`}</div>
+          </button>
+        `;
+      }).join('');
+
+      // Add-ons
+      document.getElementById('addonsOptionsGroup').innerHTML = ADDON_OPTIONS.map((opt) => {
+        const checked = state.customizing.addons.some((a) => a.id === opt.id);
+        return `
+          <button
+            type="button"
+            onclick="toggleCustomAddon('${opt.id}')"
+            class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold border transition ${
+              checked
+                ? 'bg-[#462515] text-[#f3c669] border-[#f3c669]'
+                : 'bg-[#1d0f08] text-[#ead2ba] border-[#57321f] hover:border-[#b57b4c]'
+            }"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-black ${
+                checked ? 'bg-[#f3c669] text-[#1f120b]' : 'bg-[#2f190f] text-transparent border border-[#7c492d]'
+              }">✓</span>
+              <span>${opt.label}</span>
+            </span>
+            <span class="font-mono text-[11px]">+₱${opt.delta}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCustomSize(id) {
+      const found = SIZE_OPTIONS.find((o) => o.id === id);
+      if (found) state.customizing.size = found;
+      renderCustomizationControls();
+      updateCustomLiveTotal();
+    }
+
+    function selectCustomSweetness(id) {
+      const found = SWEETNESS_OPTIONS.find((o) => o.id === id);
+      if (found) state.customizing.sweetness = found;
+      renderCustomizationControls();
+    }
+
+    function selectCustomIce(id) {
+      const found = ICE_OPTIONS.find((o) => o.id === id);
+      if (found) state.customizing.ice = found;
+      renderCustomizationControls();
+    }
+
+    function selectCustomMilk(id) {
+      const found = MILK_OPTIONS.find((o) => o.id === id);
+      if (found) state.customizing.milk = found;
+      renderCustomizationControls();
+      updateCustomLiveTotal();
+    }
+
+    function toggleCustomAddon(id) {
+      const idx = state.customizing.addons.findIndex((a) => a.id === id);
+      if (idx > -1) {
+        state.customizing.addons.splice(idx, 1);
+      } else {
+        const found = ADDON_OPTIONS.find((a) => a.id === id);
+        if (found) state.customizing.addons.push(found);
+      }
+      renderCustomizationControls();
+      updateCustomLiveTotal();
+    }
+
+    function changeCustomQty(delta) {
+      const next = Math.max(1, Math.min(20, state.customizing.qty + delta));
+      state.customizing.qty = next;
+      document.getElementById('customQtyValue').textContent = String(next);
+      updateCustomLiveTotal();
+    }
+
+    function computeCustomizedUnitPrice() {
+      const c = state.customizing;
+      if (!c.item) return 0;
+      const addonsSum = c.addons.reduce((acc, a) => acc + a.delta, 0);
+      return c.item.price + c.size.delta + c.milk.delta + addonsSum;
+    }
+
+    function updateCustomLiveTotal() {
+      const unit = computeCustomizedUnitPrice();
+      const total = unit * state.customizing.qty;
+      document.getElementById('customLiveTotal').textContent = `₱${total}`;
+    }
+
+    function addCustomizedItemToBag() {
+      const c = state.customizing;
+      if (!c.item) return;
+
+      const unitPrice = computeCustomizedUnitPrice();
+      const notesVal = document.getElementById('customNotesInput').value.trim();
+
+      state.orderBag.push({
+        uid: 'bag_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        itemId: c.item.id,
+        name: c.item.name,
+        style: c.item.style,
+        isRedeemed: false,
+        unitPrice,
+        qty: c.qty,
+        size: c.size.label,
+        sweetness: c.sweetness.label,
+        ice: c.ice.label,
+        milk: c.milk.label,
+        addons: c.addons.map((a) => a.label),
+        notes: notesVal
+      });
+
+      closeCustomizeModal();
+      updateBagBadges();
+      showToast(`Added ${c.qty}× ${c.item.name} (${c.size.label}) to your Order Bag!`);
+    }
+
+    // -----------------------------------------------------------------------
+    // 8. ORDER BAG & THANK YOU ORDER CONFIRMATION
+    // -----------------------------------------------------------------------
+    function updateBagBadges() {
+      const totalQty = state.orderBag.reduce((sum, item) => sum + item.qty, 0);
+      const totalAmount = state.orderBag.reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
+
+      document.getElementById('bagCountBadge').textContent = String(totalQty);
+      document.getElementById('bagSubtotalBadge').textContent = `₱${totalAmount}`;
+    }
+
+    function openOrderBag() {
+      renderOrderBag();
+      document.getElementById('orderBagModal').classList.remove('hidden');
+    }
+
+    function closeOrderBag() {
+      document.getElementById('orderBagModal').classList.add('hidden');
+    }
+
+    function renderOrderBag() {
+      const container = document.getElementById('orderBagItemsContainer');
+      const totalEl = document.getElementById('bagModalTotal');
+      const ptsPreviewEl = document.getElementById('bagPointsPreview');
+      const placeBtn = document.getElementById('placeOrderBtn');
+
+      if (state.orderBag.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-14 px-4 bg-[#341b10] rounded-2xl border border-[#56301d]">
+            <p class="text-base font-extrabold text-[#f3c669]">Your Order Bag is Empty</p>
+            <p class="text-xs text-[#e2c5aa] mt-1">Explore the GOLDEN HOUR menu and customize your favorite drink or frappe.</p>
+            <button
+              type="button"
+              onclick="closeOrderBag(); navigateTo('menu');"
+              class="mt-4 bg-[#f3c669] text-[#1f120b] font-extrabold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full hover:bg-[#ffd67d] transition"
+            >
+              Browse Menu
+            </button>
+          </div>
+        `;
+        totalEl.textContent = '₱0';
+        ptsPreviewEl.textContent = '+0 PTS';
+        placeBtn.disabled = true;
+        return;
+      }
+
+      placeBtn.disabled = false;
+      let totalAmount = 0;
+      let totalDrinks = 0;
+
+      container.innerHTML = state.orderBag.map((item, idx) => {
+        const lineTotal = item.unitPrice * item.qty;
+        totalAmount += lineTotal;
+        totalDrinks += item.qty;
+
+        const details = [
+          item.size,
+          item.sweetness,
+          item.ice,
+          item.milk,
+          item.addons.length ? `+ ${item.addons.join(', ')}` : null,
+          item.notes ? `Note: "${item.notes}"` : null
+        ].filter(Boolean).join(' • ');
+
+        return `
+          <div class="bg-[#341b10] border border-[#5a331e] rounded-2xl p-3.5 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-sm font-extrabold text-[#fdf3e3]">${item.name}</h4>
+                  ${item.isRedeemed ? '<span class="text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full">REWARD</span>' : ''}
+                </div>
+                <p class="text-[11px] text-[#e0c2a6] leading-snug mt-0.5">${details}</p>
+              </div>
+              <button
+                type="button"
+                onclick="removeBagItem(${idx})"
+                class="text-xs text-[#cfa482] hover:text-rose-300 font-bold px-1.5 py-0.5"
+                title="Remove item"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick="adjustBagItemQty(${idx}, -1)"
+                  class="w-6 h-6 rounded bg-[#211008] text-[#fdf3e3] font-bold text-xs flex items-center justify-center hover:bg-[#472515]"
+                >
+                  −
+                </button>
+                <span class="font-mono text-xs font-extrabold text-[#fdf3e3]">${item.qty}</span>
+                <button
+                  type="button"
+                  onclick="adjustBagItemQty(${idx}, 1)"
+                  class="w-6 h-6 rounded bg-[#211008] text-[#fdf3e3] font-bold text-xs flex items-center justify-center hover:bg-[#472515]"
+                >
+                  +
+                </button>
+              </div>
+              <span class="font-mono text-sm font-extrabold text-[#f3c669]">
+                ${item.unitPrice === 0 ? 'FREE (Redeemed)' : `₱${lineTotal}`}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const earnedPts = Math.max(5, totalDrinks * 5);
+      totalEl.textContent = `₱${totalAmount}`;
+      ptsPreviewEl.textContent = `+${earnedPts} PTS`;
+    }
+
+    function adjustBagItemQty(idx, delta) {
+      const entry = state.orderBag[idx];
+      if (!entry) return;
+      const next = entry.qty + delta;
+      if (next <= 0) {
+        state.orderBag.splice(idx, 1);
+      } else {
+        entry.qty = next;
+      }
+      updateBagBadges();
+      renderOrderBag();
+    }
+
+    function removeBagItem(idx) {
+      state.orderBag.splice(idx, 1);
+      updateBagBadges();
+      renderOrderBag();
+    }
+
+    function placeOrderNow() {
+      if (state.orderBag.length === 0) return;
+
+      const totalDrinks = state.orderBag.reduce((sum, item) => sum + item.qty, 0);
+      const totalPaid = state.orderBag.reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
+      const earnedPts = Math.max(5, totalDrinks * 5);
+      const refNum = 'GH-2026-' + String(Math.floor(1000 + Math.random() * 9000));
+
+      state.points += earnedPts;
+
+      const orderRecord = {
+        ref: refNum,
+        items: state.orderBag.map((i) => ({ ...i })),
+        totalPaid,
+        earnedPts,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      state.orderHistory.unshift(orderRecord);
+      state.orderBag = [];
+
+      updateBagBadges();
+      updateHomePointsPreview();
+      closeOrderBag();
+
+      // Populate and display the celebratory Thank You Screen/Modal
+      document.getElementById('thankYouOrderRef').textContent = refNum;
+      document.getElementById('thankYouPointsEarned').textContent = `+${earnedPts} PTS`;
+      document.getElementById('thankYouTotalPaid').textContent = `₱${totalPaid}`;
+
+      document.getElementById('thankYouItemizedList').innerHTML = orderRecord.items.map((item) => `
+        <div class="flex items-center justify-between text-[#f0dac3]">
+          <span>
+            <strong class="text-[#fdf3e3]">${item.qty}× ${item.name}</strong>
+            <span class="text-[11px] text-[#cfa786]">(${item.size}, ${item.sweetness})</span>
+          </span>
+          <span class="font-mono font-bold text-[#f3c669]">
+            ${item.unitPrice === 0 ? 'FREE' : `₱${item.unitPrice * item.qty}`}
+          </span>
+        </div>
+      `).join('');
+
+      document.getElementById('thankYouModal').classList.remove('hidden');
+      showToast(`Order ${refNum} placed! +${earnedPts} points earned.`);
+    }
+
+    function closeThankYouModal() {
+      document.getElementById('thankYouModal').classList.add('hidden');
+    }
+
+    // -----------------------------------------------------------------------
+    // 9. REWARDS, DAILY CHECK-IN & REDEEM DRINKS (1000001509 & 1000001510)
+    // -----------------------------------------------------------------------
+    function setRewardsSubTab(tab) {
+      const checkInTabBtn = document.getElementById('tabPointsCheckIn');
+      const redeemTabBtn = document.getElementById('tabRedeemDrinks');
+      const checkInView = document.getElementById('rewardsCheckInView');
+      const redeemView = document.getElementById('rewardsRedeemView');
+
+      if (tab === 'redeem') {
+        checkInTabBtn.className = 'px-5 py-2 text-xs sm:text-sm font-extrabold tracking-wider uppercase transition bg-[#3d2012] text-[#e6cbb2] hover:bg-[#4e2a18]';
+        redeemTabBtn.className = 'px-5 py-2 text-xs sm:text-sm font-extrabold tracking-wider uppercase transition bg-[#9e6b43] text-[#fdf3e3]';
+        checkInView.classList.add('hidden');
+        redeemView.classList.remove('hidden');
+      } else {
+        checkInTabBtn.className = 'px-5 py-2 text-xs sm:text-sm font-extrabold tracking-wider uppercase transition bg-[#9e6b43] text-[#fdf3e3]';
+        redeemTabBtn.className = 'px-5 py-2 text-xs sm:text-sm font-extrabold tracking-wider uppercase transition bg-[#3d2012] text-[#e6cbb2] hover:bg-[#4e2a18]';
+        checkInView.classList.remove('hidden');
+        redeemView.classList.add('hidden');
+      }
+
+      renderRewardsView();
+    }
+
+    function updateHomePointsPreview() {
+      const el = document.getElementById('homePointsPreview');
+      if (el) el.textContent = `${state.points} PTS`;
+    }
+
+    function renderRewardsView() {
+      document.getElementById('rewardsPointsNumber').textContent = String(state.points);
+      document.getElementById('rewardsTopBadge').textContent = `${state.points} PTS`;
+      document.getElementById('redeemBalanceText').textContent = String(state.points);
+      updateHomePointsPreview();
+
+      // Update semi-circular arc stroke-dashoffset (max visual scale 100 pts)
+      const arc = document.getElementById('pointsProgressArc');
+      if (arc) {
+        const totalLen = 371;
+        const ratio = Math.min(1, state.points / 100);
+        arc.style.strokeDashoffset = String(Math.round(totalLen * (1 - ratio)));
+      }
+
+      // Render 7-Day Check-In Beans
+      const row = document.getElementById('dailyCheckInRow');
+      row.innerHTML = DAILY_CHECKIN_DAYS.map((d) => {
+        const claimed = state.claimedDays.includes(d.day);
+        return `
+          <button
+            type="button"
+            onclick="claimDailyCheckIn(${d.day}, ${d.pts})"
+            class="flex flex-col items-center group focus:outline-none transition transform hover:-translate-y-0.5"
+            title="${claimed ? 'Already claimed' : `Claim ${d.pts} pt(s) for ${d.label}`}"
+          >
+            <div class="relative w-14 h-10 sm:w-16 sm:h-11 flex items-center justify-center">
+              <!-- Coffee Bean Shape -->
+              <svg class="w-full h-full drop-shadow" viewBox="0 0 68 46">
+                <ellipse
+                  cx="34"
+                  cy="23"
+                  rx="31"
+                  ry="19"
+                  fill="${claimed ? '#2b8a3e' : '#573018'}"
+                  stroke="${claimed ? '#8ce99a' : '#381d0d'}"
+                  stroke-width="2"
+                />
+                <path
+                  d="M10 23 Q 34 15, 58 23"
+                  fill="none"
+                  stroke="${claimed ? '#b2f2bb' : '#3a1d0c'}"
+                  stroke-width="2.2"
+                />
+              </svg>
+              <span class="relative z-10 font-mono text-[10px] sm:text-xs font-extrabold text-[#fff8ee] tracking-tight">
+                ${claimed ? '✓' : `${d.pts} ${d.pts === 1 ? 'PT' : 'PTS'}`}
+              </span>
+            </div>
+            <span class="text-[10px] sm:text-xs font-extrabold tracking-wider uppercase text-[#fff7ec] mt-1">
+              ${d.label}
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      // Redeemed Vouchers strip
+      const vouchersBox = document.getElementById('redeemedVouchersBox');
+      const vouchersList = document.getElementById('redeemedVouchersList');
+      if (state.redeemedVouchers.length > 0) {
+        vouchersBox.classList.remove('hidden');
+        vouchersList.innerHTML = state.redeemedVouchers.map((v) => `
+          <span class="inline-flex items-center gap-1.5 bg-[#3e2112] border border-[#f3c669]/50 text-[#fdf3e3] text-xs font-bold px-3 py-1.5 rounded-full">
+            <span>★</span>
+            <span>${v}</span>
+          </span>
+        `).join('');
+      } else {
+        vouchersBox.classList.add('hidden');
+      }
+
+      // Render Redeemable Cards (1000001510.png style)
+      const redeemGrid = document.getElementById('redeemCardsGrid');
+      redeemGrid.innerHTML = REDEEMABLE_DRINKS.map((rd) => {
+        const canAfford = state.points >= rd.cost;
+        return `
+          <div class="bg-[#9e6b43] rounded-3xl p-5 sm:p-6 flex flex-col items-center justify-between text-center shadow-[0_14px_28px_rgba(0,0,0,0.42)] border border-[#b98358]/60">
+            <div class="w-full py-2 flex items-center justify-center">
+              ${renderDrinkArtworkSVG(rd.style, 'w-32 h-44')}
+            </div>
+
+            <div class="w-full mt-2 space-y-2.5">
+              <div class="text-sm font-extrabold text-[#fff8ee]">${rd.name}</div>
+              <div class="font-mono text-base sm:text-lg font-extrabold text-[#fff8ee]">
+                ${rd.cost} pts
+              </div>
+
+              <button
+                type="button"
+                onclick="redeemDrinkReward('${rd.id}')"
+                class="w-full py-2.5 px-4 rounded-xl font-black text-xs sm:text-sm tracking-wider uppercase transition shadow ${
+                  canAfford
+                    ? 'bg-[#3b1e10] hover:bg-[#241108] text-[#fff8ee] cursor-pointer active:scale-95'
+                    : 'bg-[#3b1e10]/55 text-[#ead2ba]/70 cursor-not-allowed'
+                }"
+              >
+                ${canAfford ? 'REDEEM' : `NEED ${rd.cost} PTS`}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function claimDailyCheckIn(dayNum, pts) {
+      if (state.claimedDays.includes(dayNum)) {
+        showToast(`DAY ${dayNum} check-in reward already claimed!`);
+        return;
+      }
+      state.claimedDays.push(dayNum);
+      state.points += pts;
+      renderRewardsView();
+      showToast(`DAY ${dayNum} Check-In! +${pts} ${pts === 1 ? 'PT' : 'PTS'} added to your balance.`);
+    }
+
+    function redeemDrinkReward(rewardId) {
+      const reward = REDEEMABLE_DRINKS.find((r) => r.id === rewardId);
+      if (!reward) return;
+
+      if (state.points < reward.cost) {
+        showToast(`Not enough points yet! You have ${state.points} pts and need ${reward.cost} pts.`);
+        return;
+      }
+
+      state.points -= reward.cost;
+      state.redeemedVouchers.push(`${reward.name} (${reward.cost} pts)`);
+
+      // Add a ₱0 redeemed reward drink to the Order Bag so user can place it right away
+      state.orderBag.push({
+        uid: 'reward_' + Date.now(),
+        itemId: reward.drinkId,
+        name: reward.name,
+        style: reward.style,
+        isRedeemed: true,
+        unitPrice: 0,
+        qty: 1,
+        size: 'Regular',
+        sweetness: '100% Standard',
+        ice: 'Regular Ice',
+        milk: 'Whole Milk',
+        addons: [],
+        notes: `Redeemed with ${reward.cost} GOLDEN HOUR points`
+      });
+
+      updateBagBadges();
+      renderRewardsView();
+      showToast(`Redeemed ${reward.name}! Added FREE to your Order Bag.`);
+    }
+
+    // -----------------------------------------------------------------------
+    // 10. ACCOUNT PHONE LOGIN & OTP VERIFICATION (1000001511.png)
+    // -----------------------------------------------------------------------
+    function renderAccountView() {
+      const loggedPanel = document.getElementById('loggedInMemberPanel');
+      const loginPanel = document.getElementById('phoneLoginPanel');
+
+      if (state.member.loggedIn) {
+        loginPanel.classList.add('hidden');
+        loggedPanel.classList.remove('hidden');
+
+        document.getElementById('memberPhoneDisplay').textContent = `+63 ${state.member.phone}`;
+        document.getElementById('memberPointsDisplay').textContent = `${state.points} PTS`;
+        document.getElementById('memberOrdersCount').textContent = String(state.orderHistory.length);
+
+        const histContainer = document.getElementById('memberOrderHistory');
+        if (state.orderHistory.length === 0) {
+          histContainer.innerHTML = `<p class="text-xs text-[#cfa98a]">No past orders yet. Head to MENU to customize your first drink!</p>`;
+        } else {
+          histContainer.innerHTML = state.orderHistory.map((ord) => `
+            <div class="bg-[#341b10] border border-[#56301d] rounded-xl p-2.5 text-xs flex items-center justify-between">
+              <div>
+                <span class="font-mono font-bold text-[#f3c669]">${ord.ref}</span>
+                <span class="text-[#d7b699] ml-1.5">• ${ord.timestamp}</span>
+              </div>
+              <span class="font-mono font-bold text-[#fdf3e3]">₱${ord.totalPaid}</span>
+            </div>
+          `).join('');
+        }
+      } else {
+        loggedPanel.classList.add('hidden');
+        loginPanel.classList.remove('hidden');
+      }
+    }
+
+    function requestOtpCode(channel) {
+      const rawPhone = document.getElementById('phoneInput').value.replace(/\D/g, '');
+      if (rawPhone.length < 9) {
+        showToast('Please enter a valid Philippine mobile number (e.g., 917 123 4567).');
+        return;
+      }
+
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      state.member.phone = rawPhone;
+      state.member.channel = channel;
+      state.member.generatedOtp = code;
+
+      const otpBox = document.getElementById('otpVerificationBox');
+      const otpPrompt = document.getElementById('otpPromptText');
+      const otpInput = document.getElementById('otpCodeInput');
+
+      otpBox.classList.remove('hidden');
+      otpPrompt.textContent = `4-digit code sent via ${channel} to +63 ${rawPhone} (Demo Code: ${code})`;
+      otpInput.value = code;
+      showToast(`4-digit ${channel} verification code sent: ${code}`);
+    }
+
+    function verifyOtpCode() {
+      const entered = document.getElementById('otpCodeInput').value.trim();
+      if (!entered || entered.length < 4) {
+        showToast('Please enter the 4-digit verification code.');
+        return;
+      }
+
+      state.member.loggedIn = true;
+      document.getElementById('otpVerificationBox').classList.add('hidden');
+      renderAccountView();
+      showToast(`Welcome to GOLDEN HOUR, +63 ${state.member.phone}!`);
+    }
+
+    function logoutMember() {
+      state.member.loggedIn = false;
+      document.getElementById('phoneInput').value = '';
+      renderAccountView();
+      showToast('Signed out of GOLDEN HOUR account.');
+    }
+
+    // -----------------------------------------------------------------------
+    // 11. CONTACT US FORM HANDLERS (1000001512.png)
+    // -----------------------------------------------------------------------
+    function handleContactSubmit(event) {
+      event.preventDefault();
+      const name = document.getElementById('contactName').value.trim();
+      const email = document.getElementById('contactEmail').value.trim();
+      const msg = document.getElementById('contactMessage').value.trim();
+
+      if (!name || !email || !msg) return;
+
+      const banner = document.getElementById('contactSuccessBanner');
+      const confText = document.getElementById('contactConfirmationText');
+
+      confText.textContent = `Thank you, ${name}. We received your message regarding "${msg.slice(0, 60)}${msg.length > 60 ? '...' : ''}" and will reply to ${email}.`;
+      banner.classList.remove('hidden');
+      showToast('Message sent to GOLDEN HOUR!');
+    }
+
+    function resetContactForm() {
+      document.getElementById('contactForm').reset();
+      document.getElementById('contactSuccessBanner').classList.add('hidden');
+    }
+
+    // -----------------------------------------------------------------------
+    // 12. TOAST NOTIFICATION UTILITY (Replaces alert())
+    // -----------------------------------------------------------------------
+    function showToast(message) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto bg-[#1f120b] border border-[#f3c669] text-[#fdf3e3] px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold flex items-center gap-2.5 animate-pop';
+      toast.innerHTML = `
+        <span class="w-2.5 h-2.5 rounded-full bg-[#f3c669] shrink-0"></span>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3200);
+    }
+
+    // -----------------------------------------------------------------------
+    // 13. INITIALIZATION ON WINDOW LOAD & RESIZE
+    // -----------------------------------------------------------------------
+    window.addEventListener('resize', () => {
+      if (state.currentView === 'home') {
+        drawPixelCoffeeShop();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSidebarCategories();
+      renderMenuGrid();
+      renderRewardsView();
+      renderAccountView();
+      updateBagBadges();
+      navigateTo('home');
+    });
+  </script>
+</body>
+</html>
